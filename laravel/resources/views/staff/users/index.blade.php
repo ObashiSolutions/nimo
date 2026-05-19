@@ -10,16 +10,16 @@
             Create Staff User
         </h2>
 
-        <form method="POST" action="{{ route('staff.users.store') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <form method="POST" action="{{ route('staff.users.store') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4" autocomplete="off">
             @csrf
 
             <input name="first_name" placeholder="First Name" class="border rounded-lg px-4 py-3" required>
 
             <input name="last_name" placeholder="Last Name" class="border rounded-lg px-4 py-3" required>
 
-            <input type="email" name="email" placeholder="Email" class="border rounded-lg px-4 py-3" required>
+            <input type="email" name="email" placeholder="Email" class="border rounded-lg px-4 py-3" required autocomplete="off">
 
-            <input type="password" name="password" placeholder="Temporary Password" class="border rounded-lg px-4 py-3" required>
+            <input type="password" name="password" placeholder="Temporary Password" class="border rounded-lg px-4 py-3" required autocomplete="new-password">
 
             <select name="role" class="border rounded-lg px-4 py-3" required>
                 <option value="support">Support</option>
