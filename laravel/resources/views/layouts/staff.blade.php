@@ -81,7 +81,10 @@
                 @endphp
 
                 @if(in_array($staffRole, ['admin', 'manager']))
-                <a href="{{ route('staff.users.index') }}" class="block px-4 py-3 rounded-lg hover:bg-green-800">
+                <a
+                    href="{{ route('staff.users.index') }}"
+                    class="block px-4 py-3 rounded-lg {{ request()->routeIs('staff.users.*') ? 'bg-green-800' : 'hover:bg-green-800' }}"
+                >
                     Staff Users
                 </a>
                 @endif
