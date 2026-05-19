@@ -70,100 +70,85 @@
 
     </div>
 
-    <div class="bg-white rounded-xl shadow overflow-auto">
-
-        <table class="min-w-full">
-
-            <thead class="bg-gray-100 border-b">
-
-                <tr class="text-left text-sm text-gray-700">
-
-                    <th class="px-4 py-3">Applicant</th>
-                    <th class="px-4 py-3">Task</th>
-                    <th class="px-4 py-3">Due Date</th>
-                    <th class="px-4 py-3">Status</th>
-                    <th class="px-4 py-3">Created</th>
-
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                @forelse($tasks as $task)
-
-                    <tr class="border-b hover:bg-gray-50 text-sm">
-
-                        <td class="px-4 py-3">
-
-                            <a
-                                href="{{ route('staff.applications.show', $task->applicant->id) }}"
-                                class="text-blue-600 underline"
-                            >
-                                {{ $task->applicant->first_name }}
-                                {{ $task->applicant->last_name }}
-                            </a>
-
-                        </td>
-
-                        <td class="px-4 py-3">
-
-                            {{ $task->task }}
-
-                        </td>
-
-                        <td class="px-4 py-3">
-
-                            {{ $task->due_date ?? 'No due date' }}
-
-                            @if(
-                                $task->status !== 'Completed'
-                                &&
-                                $task->due_date
-                                &&
-                                \Carbon\Carbon::parse($task->due_date)->isPast()
-                            )
-
-                                <span class="ml-2 text-red-600 font-semibold">
-                                    OVERDUE
-                                </span>
-
-                            @endif
-
-                        </td>
-
-                        <td class="px-4 py-3">
-
-                            {{ $task->status }}
-
-                        </td>
-
-                        <td class="px-4 py-3">
-
-                            {{ $task->created_at->format('M d, Y g:i A') }}
-
-                        </td>
-
+    <div class="bg-white rounded-2xl shadow overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-[1200px]">
+                <thead class="sticky top-0 z-20 bg-gray-100">
+                    <tr class="text-left text-sm text-gray-700">
+                        <th class="px-4 py-3 whitespace-nowrap">Applicant</th>
+                        <th class="px-4 py-3 whitespace-nowrap">Task</th>
+                        <th class="px-4 py-3 whitespace-nowrap">Due Date</th>
+                        <th class="px-4 py-3 whitespace-nowrap">Status</th>
+                        <th class="px-4 py-3 whitespace-nowrap">Created</th>
                     </tr>
+                </thead>
 
-                @empty
+                <tbody>
+                    @forelse($tasks as $task)
 
-                    <tr>
+                        <tr class="border-b hover:bg-gray-50 text-sm">
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <a
+                                    href="{{ route('staff.applications.show', $task->applicant->id) }}"
+                                    class="text-blue-600 underline"
+                                >
+                                    {{ $task->applicant->first_name }}
+                                    {{ $task->applicant->last_name }}
+                                </a>
+                            </td>
 
-                        <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                            <td class="px-4 py-3 whitespace-nowrap">
 
-                            No tasks found.
+                                {{ $task->task }}
 
-                        </td>
+                            </td>
 
-                    </tr>
+                            <td class="px-4 py-3 whitespace-nowrap">
 
-                @endforelse
+                                {{ $task->due_date ?? 'No due date' }}
 
-            </tbody>
+                                @if(
+                                    $task->status !== 'Completed'
+                                    &&
+                                    $task->due_date
+                                    &&
+                                    \Carbon\Carbon::parse($task->due_date)->isPast()
+                                )
 
-        </table>
+                                    <span class="ml-2 text-red-600 font-semibold">
+                                        OVERDUE
+                                    </span>
 
+                                @endif
+
+                            </td>
+
+                            <td class="px-4 py-3 whitespace-nowrap">
+
+                                {{ $task->status }}
+
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+
+                                {{ $task->created_at->format('M d, Y g:i A') }}
+
+                            </td>
+                        </tr>
+
+                    @empty
+
+                        <tr>
+                            <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+
+                                No tasks found.
+
+                            </td>
+                        </tr>
+
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div class="mt-6">

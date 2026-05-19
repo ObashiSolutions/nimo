@@ -244,7 +244,9 @@
             </div>
         @endif
 
-        @yield('content')
+        <div class="overflow-x-hidden">
+            @yield('content')
+        </div>
 
     </main>
 
