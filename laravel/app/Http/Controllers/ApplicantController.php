@@ -245,6 +245,13 @@ class ApplicantController extends Controller
 
         ApplicantTimeline::create([
             'applicant_id' => $applicant->id,
+            'event_type' => 'payment_receipt_uploaded',
+            'message' => 'Payment receipt uploaded by applicant.',
+            'performed_by' => 'Applicant',
+        ]);
+
+        ApplicantTimeline::create([
+            'applicant_id' => $applicant->id,
             'event_type' => 'payment_receipt',
             'message' => 'Payment receipt uploaded.',
             'performed_by' => 'Applicant',
