@@ -137,6 +137,14 @@ class ApplicantController extends Controller
             // we are not storing file paths in DB yet; they are safely stored on disk
         ]);
 
+
+        ApplicantTimeline::create([
+            'applicant_id' => $applicant->id,
+            'event_type' => 'application_submitted',
+            'message' => 'Application submitted by applicant.',
+            'performed_by' => 'Applicant',
+        ]);
+
         foreach ($uploadedDocuments as $document) {
             ApplicantDocument::create([
                 'applicant_id' => $applicant->id,
@@ -241,7 +249,7 @@ class ApplicantController extends Controller
             'message' => 'Payment receipt uploaded.',
             'performed_by' => 'Applicant',
         ]);
-        
+
         $applicant->refresh();
 
         Mail::to(env('MORTGAGE_APPLICATION_EMAIL'))
