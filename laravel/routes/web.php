@@ -13,6 +13,7 @@ use App\Http\Controllers\ApplicantTaskController;
 use App\Http\Controllers\StaffTaskController;
 use App\Http\Controllers\StaffFileController;
 use App\Http\Controllers\StaffDocumentZipController;
+use App\Http\Controllers\StaffUserController;
 
 
 /*
@@ -111,5 +112,14 @@ Route::middleware('staff.auth')->group(function () {
 
     Route::get('/staff/applications/{applicant}/documents/zip', [StaffDocumentZipController::class, 'download'])
         ->name('staff.applications.documents.zip');
+    
+    Route::get('/staff/users', [StaffUserController::class, 'index'])
+    ->name('staff.users.index');
+
+    Route::post('/staff/users', [StaffUserController::class, 'store'])
+        ->name('staff.users.store');
+
+    Route::patch('/staff/users/{staffUser}/toggle-status', [StaffUserController::class, 'toggleStatus'])
+        ->name('staff.users.toggleStatus');
 
 });

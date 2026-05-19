@@ -76,6 +76,9 @@
                     Reports / Export
                 </a>
 
+                <a href="{{ route('staff.users.index') }}" class="block px-4 py-3 rounded-lg hover:bg-green-800">
+                    Staff Users
+                </a>
             </nav>
 
             <div class="p-4 border-t border-green-800">
