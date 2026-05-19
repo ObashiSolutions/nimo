@@ -93,8 +93,9 @@ Route::middleware('staff.auth')->group(function () {
             ->name('staff.applications.show');
 
         Route::get('/staff/applications/export/csv', [StaffExportController::class, 'exportCsv'])
-            ->name('staff.applications.exportCsv');
-
+            ->name('staff.applications.exportCsv')
+            ->middleware('staff.role:admin,manager');
+            
         Route::post('/staff/applications/{applicant}/notes', [ApplicantNoteController::class, 'store'])
             ->name('staff.applications.notes.store');
 

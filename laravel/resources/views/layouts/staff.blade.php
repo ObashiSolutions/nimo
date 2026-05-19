@@ -76,9 +76,16 @@
                     Reports / Export
                 </a>
 
+                @php
+                    $staffRole = Auth::guard('staff')->user()?->role;
+                @endphp
+
+                @if(in_array($staffRole, ['admin', 'manager']))
                 <a href="{{ route('staff.users.index') }}" class="block px-4 py-3 rounded-lg hover:bg-green-800">
                     Staff Users
                 </a>
+                @endif
+
             </nav>
 
             <div class="p-4 border-t border-green-800">
