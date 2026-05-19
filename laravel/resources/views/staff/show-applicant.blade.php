@@ -305,43 +305,7 @@
 
 
 
-    <div class="mt-8 bg-white rounded-xl shadow p-6">
-        <h2 class="text-xl font-bold border-b pb-3 mb-4">
-            Activity Timeline
-        </h2>
-        <div class="space-y-4">
-            @forelse($applicant->activities->sortByDesc('created_at') as $activity)
-                <div class="border-l-4 border-green-700 bg-gray-50 p-4 rounded-r-lg">
-                    <div class="flex items-center justify-between">
-                        <div class="font-semibold">
-                            {{ $activity->activity_type }}
-                        </div>
-
-                        <div class="text-xs text-gray-500">
-                            {{ $activity->created_at->format('M d, Y g:i A') }}
-                        </div>
-                    </div>
-
-                    <div class="text-gray-700 mt-2">
-                        {{ $activity->description }}
-                    </div>
-                    
-                    <div class="text-xs text-gray-400 mt-2">
-                        By: {{ $activity->performed_by }}
-                    </div>
-                </div>
-
-            @empty
-
-                <div class="text-gray-400">
-                    No activity yet.
-                </div>
-
-            @endforelse
-        </div>
-    </div>
-
-
+    
     <!-- Internal Notes Section -->
     <div class="mt-8 bg-white rounded-xl shadow p-6">
 

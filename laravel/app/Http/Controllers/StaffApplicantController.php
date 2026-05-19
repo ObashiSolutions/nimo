@@ -14,7 +14,6 @@ class StaffApplicantController extends Controller
             'documents',
             'notes',
             'tasks',
-            'activities',
             'timeline',
         ]);
 
