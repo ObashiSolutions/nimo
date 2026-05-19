@@ -8,6 +8,9 @@ use App\Models\ApplicantDocument;
 use App\Models\ApplicantNote;
 use App\Models\ApplicantTask;
 use App\Models\ApplicantActivity;
+use App\Models\ApplicantTimeline;
+
+
 
 class Applicant extends Model
 {
@@ -80,5 +83,11 @@ class Applicant extends Model
     public function activities()
     {
         return $this->hasMany(ApplicantActivity::class);
+    }
+
+    public function timeline()
+    {
+        return $this->hasMany(ApplicantTimeline::class)
+            ->latest();
     }
 }

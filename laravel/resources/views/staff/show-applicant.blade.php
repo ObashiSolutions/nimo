@@ -412,4 +412,56 @@
     </div>
 </div>
 
+<div class="bg-white rounded-2xl shadow p-6 mt-8">
+
+    <h2 class="text-xl font-bold mb-6">
+        Applicant Timeline
+    </h2>
+
+    <div class="space-y-4">
+
+        @forelse($applicant->timeline as $event)
+
+            <div class="border-l-4 border-green-700 pl-4 py-2">
+
+                <div class="flex items-center justify-between gap-4 flex-wrap">
+
+                    <div>
+
+                        <p class="font-semibold text-gray-900">
+                            {{ $event->message }}
+                        </p>
+
+                        <p class="text-sm text-gray-500 mt-1">
+
+                            {{ ucfirst(str_replace('_', ' ', $event->event_type)) }}
+
+                            @if($event->performed_by)
+                                · {{ $event->performed_by }}
+                            @endif
+
+                        </p>
+
+                    </div>
+
+                    <div class="text-sm text-gray-400 whitespace-nowrap">
+                        {{ $event->created_at->format('M d, Y g:i A') }}
+                    </div>
+
+                </div>
+
+            </div>
+
+        @empty
+
+            <p class="text-gray-500">
+                No timeline activity yet.
+            </p>
+
+        @endforelse
+
+    </div>
+
+</div>
+
 @endsection
