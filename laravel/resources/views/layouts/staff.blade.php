@@ -47,7 +47,10 @@
 
             <nav class="flex-1 px-4 py-6 space-y-2 text-sm">
 
-                <a href="{{ route('staff.dashboard') }}" class="block px-4 py-3 rounded-lg hover:bg-green-800">
+                <a
+                    href="{{ route('staff.dashboard') }}"
+                    class="block px-4 py-3 rounded-lg {{ request()->routeIs('staff.dashboard') ? 'bg-green-800' : 'hover:bg-green-800' }}"
+                >
                     Dashboard
                 </a>
 
@@ -55,7 +58,10 @@
                     Applications
                 </a>
 
-                <a href="{{ route('staff.tasks.index') }}" class="block px-4 py-3 rounded-lg hover:bg-green-800">
+                <a
+                    href="{{ route('staff.tasks.index') }}"
+                    class="block px-4 py-3 rounded-lg {{ request()->routeIs('staff.tasks.*') ? 'bg-green-800' : 'hover:bg-green-800' }}"
+                >
                     Tasks / Follow Ups
 
                     @php
@@ -66,13 +72,21 @@
                     @endphp
 
                     @if($overdueTasksCount > 0)
+
                         <span class="ml-2 inline-flex items-center justify-center bg-red-600 text-white text-xs font-bold rounded-full px-2 py-1">
+
                             {{ $overdueTasksCount }}
+
                         </span>
+
                     @endif
+
                 </a>
 
-                <a href="{{ route('staff.applications.exportCsv') }}" class="block px-4 py-3 rounded-lg hover:bg-green-800">
+                <a
+                    href="{{ route('staff.applications.exportCsv') }}"
+                    class="block px-4 py-3 rounded-lg {{ request()->routeIs('staff.applications.exportCsv') ? 'bg-green-800' : 'hover:bg-green-800' }}"
+                >
                     Reports / Export
                 </a>
 
