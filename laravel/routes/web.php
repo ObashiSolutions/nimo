@@ -77,49 +77,54 @@ Route::post('/staff/login', [StaffAuthController::class, 'login'])
 Route::middleware('staff.auth')->group(function () {
 
     // all staff routes here
-    Route::post('/staff/logout', [StaffAuthController::class, 'logout'])
-    ->name('staff.logout');
+    Route::middleware('staff.role:admin,manager')->group(function () {
 
-    Route::get('/staff/dashboard', [StaffDashboardController::class, 'index'])
-        ->name('staff.dashboard');
+        // staff users routes here
+        Route::post('/staff/logout', [StaffAuthController::class, 'logout'])
+        ->name('staff.logout');
 
-    Route::patch('/staff/applications/{applicant}/status', [StaffApplicationController::class, 'updateStatus'])
-    ->name('staff.applications.updateStatus');
+        Route::get('/staff/dashboard', [StaffDashboardController::class, 'index'])
+            ->name('staff.dashboard');
 
-    Route::get('/staff/applications/{applicant}', [StaffApplicantController::class, 'show'])
-        ->name('staff.applications.show');
+        Route::patch('/staff/applications/{applicant}/status', [StaffApplicationController::class, 'updateStatus'])
+        ->name('staff.applications.updateStatus');
 
-    Route::get('/staff/applications/export/csv', [StaffExportController::class, 'exportCsv'])
-        ->name('staff.applications.exportCsv');
+        Route::get('/staff/applications/{applicant}', [StaffApplicantController::class, 'show'])
+            ->name('staff.applications.show');
 
-    Route::post('/staff/applications/{applicant}/notes', [ApplicantNoteController::class, 'store'])
-        ->name('staff.applications.notes.store');
+        Route::get('/staff/applications/export/csv', [StaffExportController::class, 'exportCsv'])
+            ->name('staff.applications.exportCsv');
 
-    Route::post('/staff/applications/{applicant}/tasks', [ApplicantTaskController::class, 'store'])
-        ->name('staff.applications.tasks.store');
+        Route::post('/staff/applications/{applicant}/notes', [ApplicantNoteController::class, 'store'])
+            ->name('staff.applications.notes.store');
 
-    Route::patch('/staff/tasks/{task}/complete', [ApplicantTaskController::class, 'complete'])
-        ->name('staff.tasks.complete');
+        Route::post('/staff/applications/{applicant}/tasks', [ApplicantTaskController::class, 'store'])
+            ->name('staff.applications.tasks.store');
 
-    Route::get('/staff/tasks', [StaffTaskController::class, 'index'])
-        ->name('staff.tasks.index');
+        Route::patch('/staff/tasks/{task}/complete', [ApplicantTaskController::class, 'complete'])
+            ->name('staff.tasks.complete');
+
+        Route::get('/staff/tasks', [StaffTaskController::class, 'index'])
+            ->name('staff.tasks.index');
+            
+        Route::get('/staff/documents/{document}/view', [StaffFileController::class, 'viewDocument'])
+        ->name('staff.documents.view');
+
+        Route::get('/staff/applications/{applicant}/receipt/view', [StaffFileController::class, 'viewReceipt'])
+            ->name('staff.receipts.view');
+
+        Route::get('/staff/applications/{applicant}/documents/zip', [StaffDocumentZipController::class, 'download'])
+            ->name('staff.applications.documents.zip');
         
-    Route::get('/staff/documents/{document}/view', [StaffFileController::class, 'viewDocument'])
-    ->name('staff.documents.view');
+        Route::get('/staff/users', [StaffUserController::class, 'index'])
+        ->name('staff.users.index');
 
-    Route::get('/staff/applications/{applicant}/receipt/view', [StaffFileController::class, 'viewReceipt'])
-        ->name('staff.receipts.view');
+        Route::post('/staff/users', [StaffUserController::class, 'store'])
+            ->name('staff.users.store');
 
-    Route::get('/staff/applications/{applicant}/documents/zip', [StaffDocumentZipController::class, 'download'])
-        ->name('staff.applications.documents.zip');
+        Route::patch('/staff/users/{staffUser}/toggle-status', [StaffUserController::class, 'toggleStatus'])
+            ->name('staff.users.toggleStatus');
     
-    Route::get('/staff/users', [StaffUserController::class, 'index'])
-    ->name('staff.users.index');
-
-    Route::post('/staff/users', [StaffUserController::class, 'store'])
-        ->name('staff.users.store');
-
-    Route::patch('/staff/users/{staffUser}/toggle-status', [StaffUserController::class, 'toggleStatus'])
-        ->name('staff.users.toggleStatus');
+    });
 
 });
