@@ -2,46 +2,63 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\StaffUser;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class StaffAuthController extends Controller
 {
     public function showLogin()
     {
-        return view('staff.login');
+        return view('staff.auth.login');
     }
 
     public function login(Request $request)
     {
-        $request->validate([
-            'username' => 'required',
-            'password' => 'required',
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
         ]);
 
+        $user = StaffUser::where('email', $credentials['email'])->first();
+
+        if (!$user || !$user->is_active) {
+
+            return back()->withErrors([
+                'email' => 'Invalid credentials or inactive account.',
+            ]);
+        }
+
         if (
-            $request->username === 'admin'
-            &&
-            $request->password === 'password123'
+            Auth::guard('staff')->attempt(
+                $credentials,
+                $request->boolean('remember')
+            )
         ) {
 
-            session([
-                'staff_logged_in' => true,
+            $user->update([
+                'last_login_at' => now(),
             ]);
 
-            return redirect()
-                ->route('staff.dashboard');
+            $request->session()->regenerate();
+
+            return redirect()->route('staff.dashboard');
         }
 
         return back()->withErrors([
-            'login' => 'Invalid credentials.',
+            'email' => 'Invalid credentials.',
         ]);
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
-        session()->forget('staff_logged_in');
+        Auth::guard('staff')->logout();
 
-        return redirect()
-            ->route('staff.login');
+        $request->session()->invalidate();
+
+        $request->session()->regenerateToken();
+
+        return redirect()->route('staff.login');
     }
 }
