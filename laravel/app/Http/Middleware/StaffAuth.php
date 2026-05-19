@@ -4,12 +4,13 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class StaffAuth
 {
     public function handle(Request $request, Closure $next)
     {
-        if (!session('staff_logged_in')) {
+        if (!Auth::guard('staff')->check()) {
             return redirect()->route('staff.login');
         }
 

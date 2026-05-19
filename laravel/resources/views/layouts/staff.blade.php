@@ -156,7 +156,9 @@
 
                     {{-- Internal Access --}}
                     <div class="text-sm text-gray-500 whitespace-nowrap">
-                        Internal Access
+                        {{ Auth::guard('staff')->user()->first_name ?? 'Staff' }}
+                        ·
+                        {{ ucfirst(Auth::guard('staff')->user()->role ?? 'staff') }}
                     </div>
 
                 </div>
