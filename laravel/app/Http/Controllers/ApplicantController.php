@@ -11,6 +11,10 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\MortgageApplicationReceived;
 use App\Models\ApplicantDocument;
 use App\Mail\PaymentReceiptSubmitted;
+use App\Models\ApplicantTimeline;
+
+
+
 
 class ApplicantController extends Controller
 {
@@ -231,6 +235,13 @@ class ApplicantController extends Controller
             'payment_submitted_at' => now(),
         ]);
 
+        ApplicantTimeline::create([
+            'applicant_id' => $applicant->id,
+            'event_type' => 'payment_receipt',
+            'message' => 'Payment receipt uploaded.',
+            'performed_by' => 'Applicant',
+        ]);
+        
         $applicant->refresh();
 
         Mail::to(env('MORTGAGE_APPLICATION_EMAIL'))
