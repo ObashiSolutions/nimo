@@ -5,42 +5,42 @@ namespace App\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Storage;
 
 class MortgageApplicationReceived extends Mailable
 {
     use Queueable, SerializesModels;
 
-    // Data used inside the email view
     public $data;
-
-    /**
-     * Paths under storage/app, e.g. ['private_applicants_data/file1.pdf', ...]
-     */
     protected array $attachmentFiles;
+    protected string $emailType;
 
-    /**
-     * @param array $data            Data for the email body
-     * @param array $attachmentFiles Relative paths under storage/app
-     */
-    public function __construct(array $data, array $attachmentFiles = [])
+    public function __construct(array $data, array $attachmentFiles = [], string $emailType = 'admin')
     {
         $this->data = $data;
         $this->attachmentFiles = $attachmentFiles;
+        $this->emailType = $emailType;
     }
 
     public function build()
     {
-        // Keep your original subject + view
-        $email = $this->subject('New pre-approval mortgage application submitted.')
-                      ->view('emails.mortgage_application')
-                      ->with(['data' => $this->data]);
+        $subject = $this->emailType === 'applicant'
+            ? 'Copy of Mortgage Pre-Approval Application'
+            : 'New Mortgage Pre-Approval Application';
 
-        // Minimal + safe attachment fix
+        $view = $this->emailType === 'applicant'
+            ? 'emails.mortgage_application_copy'
+            : 'emails.mortgage_application';
+
+        $email = $this->subject($subject)
+            ->view($view)
+            ->with(['data' => $this->data]);
+
         foreach ($this->attachmentFiles as $file) {
-            $fullPath = storage_path('app/' . $file);
-
-            if (file_exists($fullPath)) {
-                $email->attach($fullPath);
+            if (Storage::disk('local')->exists($file)) {
+                $email->attach(
+                    Storage::disk('local')->path($file)
+                );
             }
         }
 

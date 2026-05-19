@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Applicant;
+use Illuminate\Http\Request;
+use App\Models\ApplicantActivity;
+
+class StaffApplicationController extends Controller
+{
+    public function updateStatus(Request $request, Applicant $applicant)
+    {
+        $request->validate([
+            'application_status' => 'required|string|in:Pending Payment,Pending Verification,In Review,Approved,Rejected,Closed',
+        ]);
+
+        $oldStatus = $applicant->application_status;
+
+        $applicant->update([
+            'application_status' => $request->application_status,
+        ]);
+
+        ApplicantActivity::create([
+            'applicant_id' => $applicant->id,
+            'activity_type' => 'Status Change',
+            'description' =>
+                'Application status changed from "' .
+                $oldStatus .
+                '" to "' .
+                $request->application_status .
+                '".',
+            'performed_by' => 'Staff',
+        ]);
+
+        return back()->with('success_message', 'Application status updated.');
+    }
+}

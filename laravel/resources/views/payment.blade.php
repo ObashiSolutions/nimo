@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mortgage Payment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+
+    <!--Header-->
+    <header class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-center">
+            <img
+                src="{{ asset('images/nigeria-mortgage-logo-cthru.png') }}"
+                class="h-12 w-auto"
+                alt="Nigeria Mortgages"
+            >
+        </div>
+    </header>
+    
+    <!--Hero-->
+    <section class="bg-green-800 text-white">
+        <div class="max-w-5xl mx-auto px-6 py-10 text-center">
+            <h1 class="text-3xl md:text-5xl font-extrabold uppercase tracking-wide">
+                Mortgage Pre-Approval Payment
+            </h1>
+            <p class="mt-3 text-green-100">
+                Complete your payment to continue your pre-approval processing.
+            </p>
+        </div>
+    </section>
+
+    <div class="max-w-2xl mx-auto py-10 px-4">
+
+        <div class="bg-white rounded-xl shadow-md p-6 space-y-6">
+
+            <div class="text-center">
+                <h1 class="text-2xl font-bold text-gray-900">
+                    Mortgage Pre-Approval Payment
+                </h1>
+
+                <p class="text-sm text-gray-600 mt-2">
+                    Reference ID:
+                    <span class="font-semibold">
+                        {{ $applicant->reference_id }}
+                    </span>
+                </p>
+            </div>
+
+            <div class="border rounded-lg p-4 bg-gray-50">
+                <h2 class="font-semibold text-lg mb-3">
+                    Payment Instructions
+                </h2>
+
+                <div class="space-y-2 text-sm text-gray-700">
+
+                    <p>
+                        Amount:
+                        <span class="font-bold text-black">
+                            ₦200,000
+                        </span>
+                    </p>
+
+                    <p>
+                        Bank Name:
+                        <span class="font-semibold">
+                            Zenith Bank
+                        </span>
+                    </p>
+
+                    <p>
+                        Account Name:
+                        <span class="font-semibold">
+                            Nigeria Mortgages
+                        </span>
+                    </p>
+
+                    <p>
+                        Account Number:
+                        <span class="font-semibold">
+                            10144-18111
+                        </span>
+                    </p>
+
+                </div>
+            </div>
+
+            <div class="text-sm text-gray-600 leading-relaxed">
+                Upload your payment receipt below. Once acknowledged, your application will be matched with a mortgage specialist from an MREIF-affiliated
+                banking partner.
+            </div>
+
+            <!-- Placeholder for future online payment integration -->
+            <div class="mt-6 border border-dashed border-gray-300 rounded-xl p-5 bg-gray-50">
+                <h3 class="font-bold text-lg mb-2">
+                    Online Payment Options Coming Soon
+                </h3>
+
+                <p class="text-sm text-gray-600 leading-relaxed">
+                    This section is reserved for Paystack, Flutterwave, Remita, and direct card/bank-transfer integrations. Once enabled, applicants will be able to pay securely online and return automatically to the confirmation page.
+                </p>
+            </div>
+
+            <form
+                action="{{ route('application.payment.submit', $applicant->id) }}"
+                method="POST"
+                enctype="multipart/form-data"
+                class="space-y-5"
+            >
+                @csrf
+
+                <div>
+                    <label class="block text-sm font-semibold mb-2">
+                        Upload Payment Receipt
+                    </label>
+
+                    <input
+                        type="file"
+                        name="payment_receipt"
+                        accept=".jpg,.jpeg,.png,.pdf"
+                        required
+                        class="block w-full text-sm"
+                    >
+                </div>
+
+                <button
+                    type="submit"
+                    class="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 rounded-lg"
+                >
+                    Submit Payment Receipt
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <footer class="bg-white py-10 mt-12">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between gap-6 text-sm text-gray-600">
+            <div>
+                <img src="{{ asset('images/nigeria-mortgage-logo-cthru.png') }}" class="h-12 mb-3" alt="Nigeria Mortgages">
+                <p>Secure mortgage pre-approval for Nigerian property buyers.</p>
+            </div>
+
+            <div>
+                <p class="font-bold text-gray-900">In association with</p>
+                <p>Power Players · MOFI · MREIF · ARM</p>
+            </div>
+
+            <div>
+                <p>© {{ date('Y') }} Nigeria Mortgages</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

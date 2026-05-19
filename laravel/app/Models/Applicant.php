@@ -4,6 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\ApplicantDocument;
+use App\Models\ApplicantNote;
+use App\Models\ApplicantTask;
+use App\Models\ApplicantActivity;
 
 class Applicant extends Model
 {
@@ -19,6 +23,7 @@ class Applicant extends Model
      */
     protected $fillable = [
         // 1. PERSONAL DATA
+        'reference_id',
         'first_name',
         'last_name',
         'address',
@@ -26,6 +31,10 @@ class Applicant extends Model
         'state',
         'email',
         'phone_number',
+        'application_status',
+        'payment_status',
+        'receipt_path',
+        'payment_submitted_at',
 
         // 2. WORK INFORMATION
         'company_name',
@@ -52,4 +61,24 @@ class Applicant extends Model
         'property_cost' => 'integer',
         'years_employed' => 'integer',
     ];
+
+    public function documents()
+    {
+        return $this->hasMany(ApplicantDocument::class);
+    }
+
+    public function notes()
+    {
+        return $this->hasMany(ApplicantNote::class);
+    }
+
+    public function tasks()
+    {
+        return $this->hasMany(ApplicantTask::class);
+    }
+
+    public function activities()
+    {
+        return $this->hasMany(ApplicantActivity::class);
+    }
 }

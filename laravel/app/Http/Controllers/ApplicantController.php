@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Applicant;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\MortgageApplicationReceived;
+use App\Models\ApplicantDocument;
+use App\Mail\PaymentReceiptSubmitted;
 
 class ApplicantController extends Controller
 {
@@ -16,7 +19,7 @@ class ApplicantController extends Controller
      */
     public function showForm()
     {
-        return view('welcome');
+        return view('application');
     }
 
     /**
@@ -59,15 +62,15 @@ class ApplicantController extends Controller
             'g-recaptcha-response' => 'required|captcha',
 
             // 5. SUPPORTING DOCUMENTS (single input, many files)
-            'supporting_documents.*' => 'nullable|mimes:pdf,jpg,jpeg,png|max:32768', // up to ~32MB each
+            'supporting_documents.*' => 'nullable|mimes:pdf,jpg,jpeg,png,zip,rar|max:32768', // up to ~32MB each
         ];
 
         $messages = [
             'email.unique'  => 'The provided email has already submitted an application. Please contact us via WhatsApp if you need to update your details.',
             'property_cost.min' => 'The property cost must be a realistic value.',
             'property_cost.numeric' => 'The property cost must be a number (no commas or symbols).',
-            'supporting_documents.*.mimes' => 'Each supporting document must be a PDF, JPG, or PNG file.',
-            'supporting_documents.*.max'   => 'Each supporting document must not be larger than 10MB.',
+            'supporting_documents.*.mimes' => 'Each supporting document must be a PDF, JPG, JPEG, PNG, ZIP, or RAR file.',
+            'supporting_documents.*.max'   => 'Each supporting document must not be larger than 32MB.',
             'g-recaptcha-response.required' => 'Please complete the reCAPTCHA to verify you are human.',
             'g-recaptcha-response.captcha'  => 'reCAPTCHA verification failed. Please try again.',
         ];
@@ -82,12 +85,20 @@ class ApplicantController extends Controller
         // STEP 2: HANDLE SECURE FILE UPLOADS (MULTIPLE FILES, ONE FIELD)
         // ============================================================
 
-        $uploadedPaths = [];
-
+        $uploadedDocuments = [];
         if ($request->hasFile('supporting_documents')) {
             foreach ($request->file('supporting_documents') as $file) {
                 if ($file->isValid()) {
-                    $uploadedPaths[] = $file->store('private_applicants_data', 'local');
+                    $storedPath = $file->store(
+                        'private_applicants_data',
+                        'local'
+                    );
+                    $uploadedDocuments[] = [
+                        'original_name' => $file->getClientOriginalName(),
+                        'file_path'     => $storedPath,
+                        'mime_type'     => $file->getMimeType(),
+                        'file_size'     => $file->getSize(),
+                    ];
                 }
             }
         }
@@ -96,7 +107,9 @@ class ApplicantController extends Controller
         // STEP 3: SAVE DATA TO THE DATABASE
         // ============================================================
 
-        Applicant::create([
+        $applicant = Applicant::create([
+            'reference_id'      => 'NM-' . strtoupper(Str::random(8)),
+            
             'first_name'       => $request->input('first_name'),
             'last_name'        => $request->input('last_name'),
             'address'          => $request->input('address'),
@@ -114,8 +127,22 @@ class ApplicantController extends Controller
             'estate_name'      => $request->input('estate_name'),
             'property_address' => $request->input('property_address'),
             'property_cost'    => $request->input('property_cost'),
+
+            'application_status' => 'Pending Payment',
+            'payment_status'    => 'Unpaid',
             // we are not storing file paths in DB yet; they are safely stored on disk
         ]);
+
+        foreach ($uploadedDocuments as $document) {
+            ApplicantDocument::create([
+                'applicant_id' => $applicant->id,
+                'document_type'=> 'supporting_document',
+                'original_name'=> $document['original_name'],
+                'file_path'    => $document['file_path'],
+                'mime_type'    => $document['mime_type'],
+                'file_size'    => $document['file_size'],
+            ]);
+        }
 
         // ============================================================
         // STEP 4: SEND NOTIFICATION EMAIL TO YOU
@@ -142,12 +169,20 @@ class ApplicantController extends Controller
 
         //Mail details to me
         Mail::to(env('MORTGAGE_APPLICATION_EMAIL'))
-            ->send(new MortgageApplicationReceived($dataForEmail, $uploadedPaths));
+            ->send(new MortgageApplicationReceived(
+                $dataForEmail,
+                collect($uploadedDocuments)->pluck('file_path')->toArray(),
+                'admin'
+            ));
         
         // Send a copy/ confirmation to the applicant
         if ($request->filled('email') && filter_var($request->email, FILTER_VALIDATE_EMAIL)) {
             Mail::to($request->email)
-                ->send(new MortgageApplicationReceived($dataForEmail));
+                ->send(new MortgageApplicationReceived(
+                    $dataForEmail,
+                    collect($uploadedDocuments)->pluck('file_path')->toArray(),
+                    'applicant'
+                ));
         }
 
 
@@ -156,8 +191,7 @@ class ApplicantController extends Controller
         // ============================================================
 
         return redirect()
-            ->route('application.success')
-            ->with('success_message', 'Your secure pre-approval application has been successfully submitted! We shall contact you via email along with a WhatsApp notification within 24 hours. Please keep your WhatsApp open.');
+            ->route('application.payment', $applicant->id);
     }
 
     /**
@@ -166,5 +200,47 @@ class ApplicantController extends Controller
     public function showSuccess()
     {
         return view('success');
+    }
+
+    public function showPaymentPage($id)
+    {
+        $applicant = Applicant::findOrFail($id);
+
+        return view('payment', compact('applicant'));
+    }
+
+    public function submitPaymentReceipt(Request $request, $id)
+    {
+        $request->validate([
+            'payment_receipt' => 'required|mimes:jpg,jpeg,png,pdf|max:32768',
+        ]);
+
+        $applicant = Applicant::findOrFail($id);
+
+        $receiptPath = null;
+
+        if ($request->hasFile('payment_receipt')) {
+            $receiptPath = $request->file('payment_receipt')
+                ->store('payment_receipts', 'local');
+        }
+
+        $applicant->update([
+            'receipt_path' => $receiptPath,
+            'payment_status' => 'Pending Verification',
+            'application_status' => 'Payment Receipt Submitted',
+            'payment_submitted_at' => now(),
+        ]);
+
+        $applicant->refresh();
+
+        Mail::to(env('MORTGAGE_APPLICATION_EMAIL'))
+            ->send(new PaymentReceiptSubmitted($applicant));
+
+        return redirect()
+            ->route('application.success')
+            ->with(
+                'success_message',
+                'Your payment receipt has been acknowledged successfully. We shall contact you via email along with a WhatsApp notification within 24 hours. Please keep your WhatsApp open.'
+            );
     }
 }

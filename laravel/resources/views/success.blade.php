@@ -17,21 +17,32 @@
 
 
 <body class="antialiased">
-    <!-- TOP NAV WITH LOGO -->
-    <header class="w-full bg-white shadow">
-        <div class="max-w-6xl mx-auto flex items-center px-4 py-3">
+    <!-- TOP NAV WITH LOGO --> <!--Header-->
+    <header class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-center">
+            <img
+                src="{{ asset('images/nigeria-mortgage-logo-cthru.png') }}"
+                class="h-12 w-auto"
+                alt="Nigeria Mortgages"
+            >
         </div>
     </header>
     
+    <!--Hero-->
+    <section class="bg-green-800 text-white">
+        <div class="max-w-5xl mx-auto px-6 py-10 text-center">
+            <h1 class="text-3xl md:text-5xl font-extrabold uppercase tracking-wide">
+                Thank You & Congratulations!
+            </h1>
+            <p class="mt-3 text-green-100 text-lg">
+                Your pre-approval application has been received.
+            </p>
+        </div>
+    </section>
+    
     <div class="min-h-screen flex flex-col">
         <!-- Top hero -->
-        <header class="hero-background text-white px-4">
-            <div class="max-w-4xl mx-auto text-center py-16 sm:py-20 px-4 sm:px-8">
-                <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-wide">
-                    THANK YOU & CONGRATULATIONS <br> YOUR PRE-APPROVAL APPLICATION HAS BEEN RECEIVED
-                </h1>
-            </div>
-        </header>
+        
     
         <!-- Main content -->
         <main class="flex-1 py-8 px-4">
