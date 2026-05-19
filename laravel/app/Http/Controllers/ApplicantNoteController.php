@@ -6,6 +6,8 @@ use App\Models\Applicant;
 use App\Models\ApplicantNote;
 use Illuminate\Http\Request;
 use App\Models\ApplicantActivity;
+use App\Models\ApplicantTimeline;
+use Illuminate\Support\Facades\Auth;
 
 class ApplicantNoteController extends Controller
 {
@@ -28,6 +30,13 @@ class ApplicantNoteController extends Controller
             'performed_by' => 'Staff',
         ]);
 
+        ApplicantTimeline::create([
+            'applicant_id' => $applicant->id,
+            'event_type' => 'note',
+            'message' => 'Internal note added.',
+            'performed_by' => Auth::guard('staff')->user()?->first_name,
+        ]);
+        
         return back()->with('success_message', 'Note added successfully.');
     }
 }

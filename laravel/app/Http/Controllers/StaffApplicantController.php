@@ -10,7 +10,13 @@ class StaffApplicantController extends Controller
 {
     public function show(Applicant $applicant)
     {
-        $applicant->load(['documents', 'notes', 'tasks', 'activities']);
+        $applicant->load([
+            'documents',
+            'notes',
+            'tasks',
+            'activities',
+            'timeline',
+        ]);
 
         return view('staff.show-applicant', compact('applicant'));
     }

@@ -6,6 +6,8 @@ use App\Models\Applicant;
 use App\Models\ApplicantTask;
 use Illuminate\Http\Request;
 use App\Models\ApplicantActivity;
+use App\Models\ApplicantTimeline;
+use Illuminate\Support\Facades\Auth;
 
 class ApplicantTaskController extends Controller
 {
@@ -29,6 +31,13 @@ class ApplicantTaskController extends Controller
             'activity_type' => 'Task Added',
             'description' => 'New follow-up task added.',
             'performed_by' => 'Staff',
+        ]);
+        
+        ApplicantTimeline::create([
+            'applicant_id' => $applicant->id,
+            'event_type' => 'task_created',
+            'message' => 'Task created: ' . $request->title,
+            'performed_by' => Auth::guard('staff')->user()?->first_name,
         ]);
 
         return back()->with('success_message', 'Task added successfully.');

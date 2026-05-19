@@ -20,6 +20,13 @@ class StaffApplicationController extends Controller
             'application_status' => $request->application_status,
         ]);
 
+        ApplicantTimeline::create([
+            'applicant_id' => $applicant->id,
+            'event_type' => 'status_update',
+            'message' => 'Application status updated to: ' . $request->application_status,
+            'performed_by' => Auth::guard('staff')->user()?->first_name,
+        ]);
+
         ApplicantActivity::create([
             'applicant_id' => $applicant->id,
             'activity_type' => 'Status Change',
