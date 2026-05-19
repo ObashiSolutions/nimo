@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'staff.auth' => \App\Http\Middleware\StaffAuth::class,
+            'staff.role' => \App\Http\Middleware\StaffRole::class,
         ]);
 
     })
