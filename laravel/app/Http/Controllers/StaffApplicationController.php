@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Applicant;
 use Illuminate\Http\Request;
 use App\Models\ApplicantActivity;
+use App\Models\ApplicantTimeline;
 
 class StaffApplicationController extends Controller
 {
