@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Applicant;
+use App\Models\ApplicantTimeline;
+use Illuminate\Support\Facades\Auth;
 
 class StaffApplicantController extends Controller
 {
