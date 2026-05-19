@@ -15,6 +15,7 @@ class StaffApplicantController extends Controller
             'notes',
             'tasks',
             'timeline',
+            'statusHistories',
         ]);
 
         return view('staff.show-applicant', compact('applicant'));

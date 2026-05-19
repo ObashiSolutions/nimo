@@ -6,6 +6,11 @@ use App\Models\Applicant;
 use Illuminate\Http\Request;
 use App\Models\ApplicantActivity;
 use App\Models\ApplicantTimeline;
+use App\Models\ApplicantStatusHistory;
+
+
+
+
 
 class StaffApplicationController extends Controller
 {
@@ -19,6 +24,13 @@ class StaffApplicationController extends Controller
 
         $applicant->update([
             'application_status' => $request->application_status,
+        ]);
+
+        ApplicantStatusHistory::create([
+            'applicant_id' => $applicant->id,
+            'old_status' => $oldStatus,
+            'new_status' => $request->application_status,
+            'changed_by' => Auth::guard('staff')->user()?->first_name,
         ]);
 
         ApplicantTimeline::create([

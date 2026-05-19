@@ -376,6 +376,72 @@
     </div>
 </div>
 
+
+
+<div class="bg-white rounded-2xl shadow p-6 mt-8">
+
+    <h2 class="text-xl font-bold mb-6">
+        Status History
+    </h2>
+
+    <div class="overflow-x-auto">
+
+        <table class="w-full min-w-[700px]">
+
+            <thead class="bg-gray-100">
+
+                <tr class="text-left text-sm text-gray-700">
+                    <th class="px-4 py-3">Old Status</th>
+                    <th class="px-4 py-3">New Status</th>
+                    <th class="px-4 py-3">Changed By</th>
+                    <th class="px-4 py-3">Date</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                @forelse($applicant->statusHistories as $history)
+
+                    <tr class="border-b text-sm">
+
+                        <td class="px-4 py-3">
+                            {{ $history->old_status ?? 'N/A' }}
+                        </td>
+
+                        <td class="px-4 py-3">
+                            {{ $history->new_status }}
+                        </td>
+
+                        <td class="px-4 py-3">
+                            {{ $history->changed_by ?? 'System' }}
+                        </td>
+
+                        <td class="px-4 py-3">
+                            {{ $history->created_at->format('M d, Y g:i A') }}
+                        </td>
+
+                    </tr>
+
+                @empty
+
+                    <tr>
+                        <td colspan="4" class="px-4 py-6 text-center text-gray-500">
+                            No status changes yet.
+                        </td>
+                    </tr>
+
+                @endforelse
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
 <div class="bg-white rounded-2xl shadow p-6 mt-8">
 
     <h2 class="text-xl font-bold mb-6">

@@ -9,6 +9,7 @@ use App\Models\ApplicantNote;
 use App\Models\ApplicantTask;
 use App\Models\ApplicantActivity;
 use App\Models\ApplicantTimeline;
+use App\Models\ApplicantStatusHistory;
 
 
 
@@ -88,6 +89,12 @@ class Applicant extends Model
     public function timeline()
     {
         return $this->hasMany(ApplicantTimeline::class)
+            ->latest();
+    }
+
+    public function statusHistories()
+    {
+        return $this->hasMany(ApplicantStatusHistory::class)
             ->latest();
     }
 }
