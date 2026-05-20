@@ -14,6 +14,7 @@ use App\Http\Controllers\StaffTaskController;
 use App\Http\Controllers\StaffFileController;
 use App\Http\Controllers\StaffDocumentZipController;
 use App\Http\Controllers\StaffUserController;
+use App\Http\Controllers\PaystackController; // For Paystack payment integration
 
 
 /*
@@ -74,9 +75,10 @@ Route::get('/staff/login', [StaffAuthController::class, 'showLogin'])
 Route::post('/staff/login', [StaffAuthController::class, 'login'])
     ->name('staff.login.submit');
 
+// All staff routes will be protected by 'staff.auth' middleware to ensure only authenticated staff can access them
 Route::middleware('staff.auth')->group(function () {
 
-    // all staff routes here
+    // Common staff routes (accessible by all staff roles)
     Route::post('/staff/logout', [StaffAuthController::class, 'logout'])
         ->name('staff.logout');
 
@@ -110,6 +112,8 @@ Route::middleware('staff.auth')->group(function () {
     Route::get('/staff/applications/{applicant}/documents/zip', [StaffDocumentZipController::class, 'download'])
         ->name('staff.applications.documents.zip');
 
+
+    // Admin-only routes
     Route::middleware('staff.role:admin,manager')->group(function () {
 
         Route::get('/staff/users', [StaffUserController::class, 'index'])
@@ -125,6 +129,13 @@ Route::middleware('staff.auth')->group(function () {
             ->name('staff.applications.exportCsv');
 
     });
+
+    // Paystack payment routes (outside of Staff role middleware since applicants will access these directly)
+    Route::post('/payment/{applicant}/paystack/initialize', [PaystackController::class, 'initialize'])
+        ->name('paystack.initialize');
+
+    Route::get('/payment/paystack/callback', [PaystackController::class, 'callback'])
+        ->name('paystack.callback');
 
 });
 

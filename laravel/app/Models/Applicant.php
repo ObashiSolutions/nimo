@@ -10,6 +10,7 @@ use App\Models\ApplicantTask;
 use App\Models\ApplicantActivity;
 use App\Models\ApplicantTimeline;
 use App\Models\ApplicantStatusHistory;
+use App\Models\Payment;
 
 
 
@@ -96,5 +97,10 @@ class Applicant extends Model
     {
         return $this->hasMany(ApplicantStatusHistory::class)
             ->latest();
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
     }
 }

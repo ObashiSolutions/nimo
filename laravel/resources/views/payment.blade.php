@@ -32,6 +32,7 @@
         </div>
     </section>
 
+    <!--Main Content-->
     <div class="max-w-2xl mx-auto py-10 px-4">
 
         <div class="bg-white rounded-xl shadow-md p-6 space-y-6">
@@ -87,6 +88,8 @@
                 </div>
             </div>
 
+
+            <!-- Instructions for applicants -->
             <div class="text-sm text-gray-600 leading-relaxed">
                 Upload your payment receipt below. Once acknowledged, your application will be matched with a mortgage specialist from an MREIF-affiliated
                 banking partner.
@@ -103,6 +106,25 @@
                 </p>
             </div>
 
+
+            <!-- Paystack payment form (placeholder for future integration) -->
+            <form
+                method="POST"
+                action="{{ route('paystack.initialize', $applicant->id) }}"
+                class="mb-6"
+            >
+                @csrf
+
+                <button
+                    class="w-full bg-green-700 hover:bg-green-800 text-white py-4 rounded-xl font-bold text-lg"
+                >
+                    Pay Online with Paystack
+                </button>
+            </form>
+
+            <div class="text-center text-gray-500 my-6">
+                OR
+            </div>
             <form
                 action="{{ route('application.payment.submit', $applicant->id) }}"
                 method="POST"
