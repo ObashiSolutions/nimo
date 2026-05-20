@@ -385,11 +385,8 @@
     </h2>
 
     <div class="overflow-x-auto">
-
         <table class="w-full min-w-[700px]">
-
             <thead class="bg-gray-100">
-
                 <tr class="text-left text-sm text-gray-700">
                     <th class="px-4 py-3">Old Status</th>
                     <th class="px-4 py-3">New Status</th>
@@ -398,13 +395,11 @@
                 </tr>
 
             </thead>
-
             <tbody>
 
                 @forelse($applicant->statusHistories as $history)
 
                     <tr class="border-b text-sm">
-
                         <td class="px-4 py-3">
                             {{ $history->old_status ?? 'N/A' }}
                         </td>
@@ -420,7 +415,6 @@
                         <td class="px-4 py-3">
                             {{ $history->created_at->format('M d, Y g:i A') }}
                         </td>
-
                     </tr>
 
                 @empty
@@ -434,11 +428,8 @@
                 @endforelse
 
             </tbody>
-
         </table>
-
     </div>
-
 </div>
 
 
