@@ -161,20 +161,7 @@
                 </div>
 
             @else
-                <!-- Paystack payment form (placeholder for future integration) -->
-                <form
-                    method="POST"
-                    action="{{ route('paystack.initialize', $applicant->id) }}"
-                    class="mb-6"
-                >
-                    @csrf
-
-                    <button
-                        class="w-full bg-green-700 hover:bg-green-800 text-white py-4 rounded-xl font-bold text-lg"
-                    >
-                        Pay Online with Paystack
-                    </button>
-                </form>
+                
 
                 <div class="text-center text-gray-500 my-6">
                     OR
@@ -190,7 +177,7 @@
                     @csrf
 
                     <div>
-                        <label class="block text-sm font-semibold mb-2">
+                        <label class="block text-xl font-semibold mb-2">
                             Upload Manual Transfer Receipt
                         </label>
 
