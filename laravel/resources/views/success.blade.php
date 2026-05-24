@@ -72,11 +72,22 @@
                         </p>
                     @endif
     
+
+                    @if(session('success_type') === 'online_payment')
                     <p class="text-xs sm:text-sm text-gray-600 text-center mb-6">
                         Our team is reviewing your details. A confirmation may have been sent to the email address you provided. Check your spam. Please also keep your
                         WhatsApp available so we can contact you quickly if any additional information is needed.
                     </p>
-    
+                    @elseif(session('success_type') === 'manual_receipt')
+                    <p class="text-xs sm:text-sm text-gray-600 text-center mb-6">
+                        Your payment receipt has been submitted successfully and is pending verification. We shall contact you via email along with a WhatsApp notification within 24 hours. Please keep your WhatsApp open.
+                    </p>
+                    @else
+                    <p class="text-xs sm:text-sm text-gray-600 text-center mb-6">
+                        Your application has been submitted successfully. However, your mortgage pre-approval application will not be reviewed or processed until payment has been received and verified.
+                    </p>                    
+                    @endif
+
                     <!-- Next steps -->
                     <div class="mt-4 border-t border-gray-200 pt-4">
                         <h3 class="text-sm sm:text-base font-semibold text-gray-900 mb-2">
