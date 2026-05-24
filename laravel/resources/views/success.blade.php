@@ -64,30 +64,33 @@
                     </h2>
     
                     @if(session('success_type') === 'online_payment')
-                    <p class="text-xs sm:text-sm text-gray-600 text-center mb-6">
-                        Our team is reviewing your details. A confirmation may have been sent to the email address you provided. Check your spam. Please also keep your
-                        WhatsApp available so we can contact you quickly if any additional information is needed.
-                    </p>
-                    @elseif(session('success_type') === 'manual_receipt')
-                    <p class="text-xs sm:text-sm text-gray-600 text-center mb-6">
-                        Your payment receipt has been submitted successfully and is pending verification. We shall contact you via email along with a WhatsApp notification within 24 hours. Please keep your WhatsApp open.
-                    </p>
-                    @else
+                        <p class="text-sm sm:text-base text-gray-700 text-center mb-4">
+                            Your online payment has been received and verified successfully.
+                        </p>
 
-                    
-                    @if(session('success_message'))
+                        <p class="text-xs sm:text-sm text-gray-600 text-center mb-6">
+                            Our team is reviewing your details. A confirmation may have been sent to the email address you provided. Check your spam. Please also keep your
+                            WhatsApp available so we can contact you quickly if any additional information is needed.
+                        </p>
+
+                    @elseif(session('success_type') === 'manual_receipt')
+                        <p class="text-sm sm:text-base text-gray-700 text-center mb-4">
+                            Your payment receipt has been submitted successfully and is pending verification.
+                        </p>
+
+                        <p class="text-xs sm:text-sm text-gray-600 text-center mb-6">
+                            We shall contact you via email along with a WhatsApp notification within 24 hours. Please keep your WhatsApp open.
+                        </p>
+
+                    @elseif(session('success_message'))
                         <p class="text-sm sm:text-base text-gray-700 text-center mb-4">
                             {{ session('success_message') }}
                         </p>
-                    @else
-                        <p class="text-sm sm:text-base text-gray-700 text-center mb-4">
-                        </p>
-                    @endif
-    
 
-                    <p class="text-xs sm:text-sm text-gray-600 text-center mb-6">
-                        Your application has been submitted successfully. However, your mortgage pre-approval application will not be reviewed or processed until payment has been received and verified.
-                    </p>                    
+                    @else
+                        <p class="text-xs sm:text-sm text-gray-600 text-center mb-6">
+                            Your application has been submitted successfully. However, your mortgage pre-approval application will not be reviewed or processed until payment has been received and verified.
+                        </p>                    
                     @endif
 
                     <!-- Next steps -->
