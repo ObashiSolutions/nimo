@@ -27,13 +27,18 @@
                                     <input
                                         type="search"
                                         name="search"
-                                        id="applicantLiveSearch"
                                         value="{{ request('search') }}"
-                                        placeholder="Search visible applicants..."
+                                        placeholder="Search applicants..."
                                         class="border rounded-lg px-4 py-2 w-72"
                                         autocomplete="off"
                                     >
-                                      
+
+                                    <button
+                                        type="submit"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-semibold"
+                                    >
+                                        Search
+                                    </button>
                                     
 
                                     <!-- Status Filter -->
@@ -326,37 +331,10 @@
                                 <tbody>
 
                                     @forelse($applicants as $applicant)
-                                        @php
-                                            $applicantSearchText = collect([
-                                                $applicant->reference_id,
-                                                $applicant->first_name,
-                                                $applicant->last_name,
-                                                $applicant->email,
-                                                $applicant->assignedStaffUser
-                                                    ? $applicant->assignedStaffUser->first_name . ' ' . $applicant->assignedStaffUser->last_name
-                                                    : 'Unassigned',
-                                                $applicant->phone_number,
-                                                $applicant->address,
-                                                $applicant->city,
-                                                $applicant->state,
-                                                $applicant->company_name,
-                                                $applicant->occupation,
-                                                $applicant->years_employed,
-                                                $applicant->estate_name,
-                                                $applicant->property_cost,
-                                                $applicant->application_status,
-                                                $applicant->payment_status,
-                                                $applicant->documents->pluck('original_name')->implode(' '),
-                                                $applicant->receipt_path ? 'View Receipt Receipt' : 'No Receipt',
-                                                $applicant->created_at->format('M d, Y g:i A'),
-                                            ])->filter()->implode(' ');
-                                        @endphp
-
                                         <tr
                                             onclick="window.location='{{ route('staff.applications.show', $applicant->id) }}'"
                                             class="border-b hover:bg-gray-50 transition text-sm align-top applicant-row cursor-pointer"
                                             data-status="{{ $applicant->application_status }}"
-                                            data-search="{{ e($applicantSearchText) }}"
                                         >
                                             <td class="px-4 py-3 whitespace-nowrap">
                                                 <input
@@ -614,11 +592,6 @@
                                         </tr>
                                     @endforelse
 
-                                    <tr id="noLiveSearchResults" class="hidden">
-                                        <td colspan="20" class="px-4 py-8 text-center text-gray-500">
-                                            No visible applications match your search.
-                                        </td>
-                                    </tr>
                                 </tbody>
                             </table>
                             </div>
@@ -661,15 +634,8 @@
             </script>
 
             <script>
-                const applicantLiveSearch = document.getElementById('applicantLiveSearch');
                 const selectAllApplicants = document.getElementById('selectAllApplicants');
                 const applicantRows = Array.from(document.querySelectorAll('.applicant-row'));
-                const noLiveSearchResults = document.getElementById('noLiveSearchResults');
-                let applicantServerSearchTimer;
-
-                function normalizeApplicantSearch(value) {
-                    return (value || '').toString().toLowerCase().replace(/\s+/g, ' ').trim();
-                }
 
                 function visibleApplicantRows() {
                     return applicantRows.filter((row) => !row.classList.contains('hidden'));
@@ -689,36 +655,6 @@
                     selectAllApplicants.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
                 }
 
-                function filterApplicantsBySearch() {
-                    const terms = normalizeApplicantSearch(applicantLiveSearch?.value)
-                        .split(' ')
-                        .filter(Boolean);
-                    let visibleCount = 0;
-
-                    applicantRows.forEach((row) => {
-                        const rowSearchText = normalizeApplicantSearch(row.dataset.search);
-                        const matches = terms.every((term) => rowSearchText.includes(term));
-
-                        row.classList.toggle('hidden', !matches);
-
-                        if (matches) {
-                            visibleCount += 1;
-                        }
-                    });
-
-                    noLiveSearchResults?.classList.toggle('hidden', visibleCount !== 0);
-                    updateSelectedApplicantsState();
-                }
-
-                applicantLiveSearch?.addEventListener('input', function () {
-                    filterApplicantsBySearch();
-                    clearTimeout(applicantServerSearchTimer);
-
-                    applicantServerSearchTimer = setTimeout(function () {
-                        applicantLiveSearch.form?.submit();
-                    }, 500);
-                });
-
                 selectAllApplicants?.addEventListener('change', function () {
                     visibleApplicantRows().forEach((row) => {
                         const checkbox = row.querySelector('.applicant-row-checkbox');
@@ -735,7 +671,7 @@
                     checkbox.addEventListener('change', updateSelectedApplicantsState);
                 });
 
-                filterApplicantsBySearch();
+                updateSelectedApplicantsState();
             </script>
 
 @endsection
