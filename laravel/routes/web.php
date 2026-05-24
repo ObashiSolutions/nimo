@@ -94,7 +94,21 @@ Route::get('/payment/paystack/callback', [PaystackController::class, 'callback']
 Route::post('/payment/paystack/webhook', [PaystackController::class, 'webhook'])
     ->name('paystack.webhook');
 
-// All staff routes will be protected by 'staff.auth' middleware to ensure only authenticated staff can access them
+
+// Flutterwave payment routes (outside of Staff role middleware since applicants will access these directly)
+Route::post('/payments/flutterwave/initialize/{applicant}', [FlutterwaveController::class, 'initialize'])
+    ->name('flutterwave.initialize');
+
+Route::get('/payments/flutterwave/callback', [FlutterwaveController::class, 'callback'])
+    ->name('flutterwave.callback');
+
+Route::post('/payments/flutterwave/webhook', [FlutterwaveController::class, 'webhook'])
+    ->name('flutterwave.webhook');
+
+
+
+
+    // All staff routes will be protected by 'staff.auth' middleware to ensure only authenticated staff can access them
 Route::middleware('staff.auth')->group(function () {
 
     // Common staff routes (accessible by all staff roles)
