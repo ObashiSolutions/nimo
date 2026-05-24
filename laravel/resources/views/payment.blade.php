@@ -50,6 +50,16 @@
                 </p>
             </div>
 
+            <div class="rounded-xl border-l-4 border-yellow-500 bg-yellow-50 p-5 text-yellow-900 space-y-3">
+                <p class="font-semibold">
+                    Your application has been submitted successfully. However, your mortgage pre-approval application will not be reviewed or processed until payment has been received and verified.
+                </p>
+
+                <p class="text-sm leading-relaxed">
+                    If you leave this page before uploading your payment receipt, you may need to submit a new application and re-upload all required documents.
+                </p>
+            </div>
+
             <div class="border rounded-lg p-4 bg-gray-50">
                 <h2 class="font-semibold text-lg mb-3">
                     Payment Instructions

@@ -425,7 +425,10 @@
                                             </td>
 
                                             <td class="px-4 py-3 font-semibold">
-                                                ₦{{ number_format($applicant->property_cost) }}
+                                                <div class="flex min-w-36 items-center justify-between gap-3">
+                                                    <span class="text-left">₦</span>
+                                                    <span class="flex-1 text-right">{{ number_format($applicant->property_cost) }}</span>
+                                                </div>
                                             </td>
 
                                             <td class="px-4 py-3 whitespace-nowrap">
@@ -468,10 +471,12 @@
                                                         onchange="event.stopPropagation(); this.form.submit();"
                                                         class="border rounded-lg px-3 py-2 text-sm {{ $appStatusBadgeClass }}"
                                                     >
-                                                            <option value="Pending Payment" {{ $applicant->application_status == 'Pending Payment' ? 'selected' : '' }}>Pending Payment</option>
-                                                            <option value="Pending Verification" {{ $applicant->application_status == 'Pending Verification' ? 'selected' : '' }}>Pending Verification</option>
-                                                            <option value="In Review" {{ $applicant->application_status == 'In Review' ? 'selected' : '' }}>In Review</option>
-                                                            <option value="Rejected" {{ $applicant->application_status == 'Rejected' ? 'selected' : '' }}>Rejected</option>
+                                                        @if(in_array($applicant->application_status, ['Pending Payment', 'Pending Verification', 'Payment Receipt Submitted', 'Payment Verified']))
+                                                            <option value="" selected disabled>{{ $applicant->application_status }}</option>
+                                                        @endif
+
+                                                        <option value="In Review" {{ $applicant->application_status == 'In Review' ? 'selected' : '' }}>In Review</option>
+                                                        <option value="Rejected" {{ $applicant->application_status == 'Rejected' ? 'selected' : '' }}>Rejected</option>
                                                         
                                                         @if(in_array(Auth::guard('staff')->user()?->role, ['admin', 'manager']))
                                                             <option value="Approved" {{ $applicant->application_status == 'Approved' ? 'selected' : '' }}>Approved</option>
@@ -497,9 +502,32 @@
                                                     };
                                                 @endphp
 
-                                                <span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold {{ $paymentBadgeClass }}">
-                                                    {{ $applicant->payment_status }}
-                                                </span>
+                                                @if(in_array(Auth::guard('staff')->user()?->role, ['admin', 'manager']))
+                                                    <form
+                                                        method="POST"
+                                                        action="{{ route('staff.applications.updatePaymentStatus', $applicant->id) }}"
+                                                        onclick="event.stopPropagation()"
+                                                        onsubmit="event.stopPropagation()"
+                                                    >
+                                                        @csrf
+                                                        @method('PATCH')
+
+                                                        <select
+                                                            name="payment_status"
+                                                            onclick="event.stopPropagation()"
+                                                            onchange="event.stopPropagation(); this.form.submit();"
+                                                            class="border rounded-lg px-3 py-2 text-sm {{ $paymentBadgeClass }}"
+                                                        >
+                                                            <option value="Unpaid" {{ $applicant->payment_status == 'Unpaid' ? 'selected' : '' }}>Pending Payment</option>
+                                                            <option value="Pending Verification" {{ $applicant->payment_status == 'Pending Verification' ? 'selected' : '' }}>Pending Verification</option>
+                                                            <option value="Paid" {{ $applicant->payment_status == 'Paid' ? 'selected' : '' }}>Paid</option>
+                                                        </select>
+                                                    </form>
+                                                @else
+                                                    <span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold {{ $paymentBadgeClass }}">
+                                                        {{ $applicant->payment_status === 'Unpaid' ? 'Pending Payment' : $applicant->payment_status }}
+                                                    </span>
+                                                @endif
                                             </td>
 
                                             <td class="px-4 py-3 whitespace-nowrap">
@@ -554,7 +582,7 @@
                                                 @if(in_array(Auth::guard('staff')->user()?->role, ['admin', 'manager']))
                                                     @if($applicant->receipt_path)
                                                         <a
-                                                            href="{{ asset('storage/' . $applicant->receipt_path) }}"
+                                                            href="{{ route('staff.receipts.view', $applicant->id) }}"
                                                             target="_blank"
                                                             class="text-blue-600 underline"
                                                             onclick="event.stopPropagation()"

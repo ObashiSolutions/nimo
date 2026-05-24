@@ -107,6 +107,14 @@ Route::middleware('staff.auth')->group(function () {
     Route::patch('/staff/applications/{applicant}/status', [StaffApplicationController::class, 'updateStatus'])
         ->name('staff.applications.updateStatus');
 
+    Route::patch('/staff/applications/{applicant}/payment-status', [StaffApplicationController::class, 'updatePaymentStatus'])
+        ->name('staff.applications.updatePaymentStatus')
+        ->middleware('staff.role:admin,manager');
+
+    Route::post('/staff/applications/{applicant}/receipt', [StaffApplicationController::class, 'uploadReceipt'])
+        ->name('staff.applications.receipts.store')
+        ->middleware('staff.role:admin,manager');
+
     Route::get('/staff/applications/{applicant}', [StaffApplicantController::class, 'show'])
         ->name('staff.applications.show');
 
@@ -171,4 +179,3 @@ Route::middleware('staff.auth')->group(function () {
     });
 
 });
-

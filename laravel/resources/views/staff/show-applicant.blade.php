@@ -224,7 +224,10 @@
 
             <div>
                 <strong>Property Cost:</strong>
-                ₦{{ number_format($applicant->property_cost) }}
+                <span class="inline-flex min-w-36 items-center justify-between gap-3 font-semibold">
+                    <span class="text-left">₦</span>
+                    <span class="flex-1 text-right">{{ number_format($applicant->property_cost) }}</span>
+                </span>
             </div>
 
         </div>
@@ -278,7 +281,7 @@
                 Payment Receipt
             </h3>
 
-            @if($applicant->receipt_path)
+            @if($applicant->receipt_path && in_array(Auth::guard('staff')->user()?->role, ['admin', 'manager']))
 
                 <a
                     href="{{ route('staff.receipts.view', $applicant->id) }}"
@@ -288,11 +291,49 @@
                     View Receipt
                 </a>
 
-            @else
+            @elseif($applicant->receipt_path)
 
                 <div class="text-gray-400">
-                    No receipt uploaded.
+                    Restricted
                 </div>
+
+            @else
+
+                @if(in_array(Auth::guard('staff')->user()?->role, ['admin', 'manager']))
+                    <form
+                        method="POST"
+                        action="{{ route('staff.applications.receipts.store', $applicant->id) }}"
+                        enctype="multipart/form-data"
+                        class="space-y-3 rounded-lg border border-yellow-200 bg-yellow-50 p-4"
+                    >
+                        @csrf
+
+                        <div>
+                            <label class="block text-sm font-semibold text-yellow-900 mb-2">
+                                Upload Payment Receipt
+                            </label>
+
+                            <input
+                                type="file"
+                                name="payment_receipt"
+                                accept=".jpg,.jpeg,.png,.pdf"
+                                required
+                                class="block w-full text-sm"
+                            >
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="bg-green-700 hover:bg-green-800 text-white px-5 py-3 rounded-lg font-semibold"
+                        >
+                            Upload Receipt
+                        </button>
+                    </form>
+                @else
+                    <div class="text-gray-400">
+                        No receipt uploaded.
+                    </div>
+                @endif
 
             @endif
 
