@@ -126,7 +126,7 @@
                             Pay Online with Flutterwave
                         </button>
                     </form>
-                    
+
                     <form
                         method="POST"
                         action="{{ route('paystack.initialize', $applicant->id) }}"
@@ -140,7 +140,6 @@
                         </button>
                     </form>
 
-                    
                 </div>
 
             </div>
