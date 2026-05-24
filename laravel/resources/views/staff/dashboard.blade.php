@@ -20,6 +20,8 @@
                                 </p>
                             </div>
 
+
+                            <!-- FILTERS -->
                             <div class="flex flex-wrap items-center gap-3">
                                 <form method="GET" class="flex flex-wrap items-center gap-3">
                                     <input
@@ -35,6 +37,8 @@
                                         Search
                                     </button>    
                                     
+
+                                    <!-- Status Filter -->
                                     <select
                                         name="status"
                                         onchange="this.form.submit()"
@@ -73,6 +77,27 @@
                                         </option>
                                     </select>
 
+
+                                    @if(in_array(Auth::guard('staff')->user()?->role, ['admin', 'manager']))
+                                    <!-- Assigned Staff Filter -->
+                                    <select
+                                        name="assigned_to"
+                                        class="border rounded-lg px-4 py-3"
+                                    >
+                                        <option value="">All Assigned Staff</option>
+
+                                        @foreach($assignableStaffUsers as $staffUser)
+                                            <option
+                                                value="{{ $staffUser->id }}"
+                                                @selected((int) request('assigned_to') === (int) $staffUser->id)
+                                            >
+                                                {{ $staffUser->first_name }} {{ $staffUser->last_name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @endif
+
+                                    <!-- Sort Filter -->
                                     <select
                                         name="sort"
                                         onchange="this.form.submit()"
@@ -91,6 +116,13 @@
                                             Lowest Property Cost
                                         </option>
                                     </select>
+                                    
+                                    <a
+                                        href="{{ route('staff.dashboard', ['assigned_to' => Auth::guard('staff')->id()]) }}"
+                                        class="inline-block bg-green-700 hover:bg-green-800 text-white px-5 py-3 rounded-lg font-semibold"
+                                    >
+                                        My Assigned Applications
+                                    </a>
 
                                     <form method="GET">
 
@@ -119,12 +151,16 @@
 
                                     </form>
 
-                                    <a
-                                        href="{{ route('staff.applications.exportCsv') }}"
-                                        class="bg-green-700 hover:bg-green-800 text-white px-5 py-2 rounded-lg font-semibold"
+                                    @if(in_array(Auth::guard('staff')->user()?->role, ['admin', 'manager']))
+
+                                        <a
+                                            href="{{ route('staff.applications.exportCsv') }}"
+                                            class="bg-green-700 hover:bg-green-800 text-white px-5 py-2 rounded-lg font-semibold"
                                         >
-                                        Export CSV
-                                    </a>
+                                            Export CSV
+                                        </a>
+
+                                    @endif
                                 </form>   
                             </div>
                         </div>
@@ -237,6 +273,9 @@
                                                 Email
                                             </a>
                                         </th>
+                                        <th class="px-4 py-3 whitespace-nowrap">
+                                            Assigned To
+                                        </th>
                                         <th class="px-4 py-3 whitespace-nowrap">Phone</th>
                                         <th class="px-4 py-3 whitespace-nowrap">Address</th>
                                         <th class="px-4 py-3 whitespace-nowrap">City</th>
@@ -264,6 +303,7 @@
                                         </th>
 
                                         <th class="px-4 py-3 whitespace-nowrap">Documents</th>
+                                        
                                         <th class="px-4 py-3 whitespace-nowrap">Receipt</th>
                                         <th class="px-4 py-3 whitespace-nowrap">
                                             <a href="{{ route('staff.dashboard', array_merge(request()->query(), ['sort' => 'created_at', 'direction' => request('direction') === 'asc' ? 'desc' : 'asc'])) }}">
@@ -299,6 +339,13 @@
 
                                             <td class="px-4 py-3 whitespace-nowrap">
                                                 {{ $applicant->email }}
+                                            </td>
+
+                                            <td class="px-4 py-3 whitespace-nowrap">
+                                                {{ $applicant->assignedStaffUser
+                                                    ? $applicant->assignedStaffUser->first_name . ' ' . $applicant->assignedStaffUser->last_name
+                                                    : 'Unassigned'
+                                                }}
                                             </td>
 
                                             <td class="px-4 py-3 whitespace-nowrap">
@@ -338,6 +385,30 @@
                                             </td>
 
                                             <td class="px-4 py-3 whitespace-nowrap">
+                                                
+                                                @php
+                                                    $appStatusBadgeClass = match($applicant->application_status) {
+                                                        'Payment Verified' => 'bg-green-100 text-green-800',
+                                                        'Approved' => 'bg-green-100 text-green-800',
+                                                        'Payment Receipt Submitted' => 'bg-yellow-100 text-yellow-800',
+                                                        'Pending Payment' => 'bg-gray-100 text-gray-700',
+                                                        'In Review' => 'bg-blue-100 text-blue-800',
+                                                        'Rejected' => 'bg-red-100 text-red-800',
+                                                        'Closed' => 'bg-gray-200 text-gray-800',
+                                                        default => 'bg-gray-100 text-gray-700',
+                                                    };
+                                                @endphp
+                                                
+                                                @php
+                                                    $currentRole = Auth::guard('staff')->user()?->role;
+                                                    $canChangeStatus = in_array($currentRole, ['admin', 'manager'])
+                                                        || (
+                                                            $currentRole === 'reviewer'
+                                                            && (int) $applicant->assigned_staff_user_id === (int) Auth::guard('staff')->id()
+                                                        );
+                                                @endphp
+
+                                                @if($canChangeStatus)
                                                 <form
                                                     method="POST"
                                                     action="{{ route('staff.applications.updateStatus', $applicant->id) }}"
@@ -351,21 +422,40 @@
                                                         name="application_status"
                                                         onclick="event.stopPropagation()"
                                                         onchange="event.stopPropagation(); this.form.submit();"
-                                                        class="border rounded-lg px-3 py-2 text-sm"
+                                                        class="border rounded-lg px-3 py-2 text-sm {{ $appStatusBadgeClass }}"
                                                     >
-                                                        <option value="Pending Payment" {{ $applicant->application_status == 'Pending Payment' ? 'selected' : '' }}>Pending Payment</option>
-                                                        <option value="Pending Verification" {{ $applicant->application_status == 'Pending Verification' ? 'selected' : '' }}>Pending Verification</option>
-                                                        <option value="In Review" {{ $applicant->application_status == 'In Review' ? 'selected' : '' }}>In Review</option>
-                                                        <option value="Approved" {{ $applicant->application_status == 'Approved' ? 'selected' : '' }}>Approved</option>
-                                                        <option value="Rejected" {{ $applicant->application_status == 'Rejected' ? 'selected' : '' }}>Rejected</option>
-                                                        <option value="Closed" {{ $applicant->application_status == 'Closed' ? 'selected' : '' }}>Closed</option>
+                                                            <option value="Pending Payment" {{ $applicant->application_status == 'Pending Payment' ? 'selected' : '' }}>Pending Payment</option>
+                                                            <option value="Pending Verification" {{ $applicant->application_status == 'Pending Verification' ? 'selected' : '' }}>Pending Verification</option>
+                                                            <option value="In Review" {{ $applicant->application_status == 'In Review' ? 'selected' : '' }}>In Review</option>
+                                                            <option value="Rejected" {{ $applicant->application_status == 'Rejected' ? 'selected' : '' }}>Rejected</option>
+                                                        
+                                                        @if(in_array(Auth::guard('staff')->user()?->role, ['admin', 'manager']))
+                                                            <option value="Approved" {{ $applicant->application_status == 'Approved' ? 'selected' : '' }}>Approved</option>
+                                                            <option value="Closed" {{ $applicant->application_status == 'Closed' ? 'selected' : '' }}>Closed</option>
+                                                        @endif
+
                                                     </select>
                                                 </form>
-
+                                                @else
+                                                    <span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold {{ $appStatusBadgeClass }}">
+                                                        {{ $applicant->application_status }}
+                                                    </span>
+                                                @endif
                                             </td>
 
                                             <td class="px-4 py-3 whitespace-nowrap">
-                                                {{ $applicant->payment_status }}
+                                                @php
+                                                    $paymentBadgeClass = match($applicant->payment_status) {
+                                                        'Paid' => 'bg-green-100 text-green-800',
+                                                        'Pending Verification' => 'bg-yellow-100 text-yellow-800',
+                                                        'Unpaid' => 'bg-gray-100 text-gray-700',
+                                                        default => 'bg-red-100 text-red-800',
+                                                    };
+                                                @endphp
+
+                                                <span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold {{ $paymentBadgeClass }}">
+                                                    {{ $applicant->payment_status }}
+                                                </span>
                                             </td>
 
                                             <td class="px-4 py-3 whitespace-nowrap">
@@ -417,23 +507,21 @@
 
                                             <td class="px-4 py-3 whitespace-nowrap">
 
-                                                @if($applicant->receipt_path)
-
-                                                    <a
-                                                        onclick="event.stopPropagation()"
-                                                        href="{{ route('staff.receipts.view', $applicant->id) }}"
-                                                        target="_blank"
-                                                        class="text-blue-600 underline text-xs"
-                                                    >
-                                                        View Receipt
-                                                    </a>
-
+                                                @if(in_array(Auth::guard('staff')->user()?->role, ['admin', 'manager']))
+                                                    @if($applicant->receipt_path)
+                                                        <a
+                                                            href="{{ asset('storage/' . $applicant->receipt_path) }}"
+                                                            target="_blank"
+                                                            class="text-blue-600 underline"
+                                                            onclick="event.stopPropagation()"
+                                                        >
+                                                            View Receipt
+                                                        </a>
+                                                    @else
+                                                        <span class="text-gray-400">No Receipt</span>
+                                                    @endif
                                                 @else
-
-                                                    <span class="text-gray-400 text-xs">
-                                                        No Receipt
-                                                    </span>
-
+                                                    <span class="text-gray-400">Restricted</span>
                                                 @endif
 
                                             </td>

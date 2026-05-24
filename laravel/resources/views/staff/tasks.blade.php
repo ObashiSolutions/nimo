@@ -76,6 +76,7 @@
                 <thead class="sticky top-0 z-20 bg-gray-100">
                     <tr class="text-left text-sm text-gray-700">
                         <th class="px-4 py-3 whitespace-nowrap">Applicant</th>
+                        <th class="px-4 py-3">Assigned To</th>
                         <th class="px-4 py-3 whitespace-nowrap">Task</th>
                         <th class="px-4 py-3 whitespace-nowrap">Due Date</th>
                         <th class="px-4 py-3 whitespace-nowrap">Status</th>
@@ -97,6 +98,15 @@
                                 </a>
                             </td>
 
+                            <td class="px-4 py-3">
+
+                                {{ $task->applicant->assignedStaffUser
+                                    ? $task->applicant->assignedStaffUser->first_name . ' ' . $task->applicant->assignedStaffUser->last_name
+                                    : 'Unassigned'
+                                }}
+
+                            </td>
+
                             <td class="px-4 py-3 whitespace-nowrap">
 
                                 {{ $task->task }}
@@ -114,6 +124,7 @@
                                     &&
                                     \Carbon\Carbon::parse($task->due_date)->isPast()
                                 )
+
 
                                     <span class="ml-2 text-red-600 font-semibold">
                                         OVERDUE
@@ -138,7 +149,7 @@
                     @empty
 
                         <tr>
-                            <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                            <td colspan="6" class="px-4 py-8 text-center text-gray-500">
 
                                 No tasks found.
 

@@ -9,10 +9,26 @@ use App\Models\ApplicantActivity;
 use App\Models\ApplicantTimeline;
 use Illuminate\Support\Facades\Auth;
 
+
+
+
+
 class ApplicantTaskController extends Controller
 {
     public function store(Request $request, Applicant $applicant)
     {
+        $currentStaffUser = Auth::guard('staff')->user();
+
+        if (
+            $currentStaffUser
+            &&
+            in_array($currentStaffUser->role, ['reviewer', 'support'])
+            &&
+            (int) $applicant->assigned_staff_user_id !== (int) $currentStaffUser->id
+        ) {
+            abort(403);
+        }
+    
         $request->validate([
             'task' => 'required|string|max:255',
             'due_date' => 'nullable|date',
@@ -45,6 +61,18 @@ class ApplicantTaskController extends Controller
 
     public function complete(ApplicantTask $task)
     {
+        $currentStaffUser = Auth::guard('staff')->user();
+
+        if (
+            $currentStaffUser
+            &&
+            in_array($currentStaffUser->role, ['reviewer', 'support'])
+            &&
+            (int) $task->applicant->assigned_staff_user_id !== (int) $currentStaffUser->id
+        ) {
+            abort(403);
+        }
+
         $task->update([
             'status' => 'Completed',
         ]);

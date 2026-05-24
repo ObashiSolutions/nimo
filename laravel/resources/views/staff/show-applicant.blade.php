@@ -4,7 +4,7 @@
 
 
 
-<div class="max-w-7xl mx-auto px-4 md:px-8 py-6 md:py-8">
+<div class="px-4 md:px-8 py-6 md:py-8">
 
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
 
@@ -19,6 +19,41 @@
                 {{ $applicant->reference_id }}
             </p>
 
+
+            @php
+                $appStatusBadgeClass = match($applicant->application_status) {
+                    'Payment Verified' => 'bg-green-100 text-green-800',
+                    'Approved' => 'bg-green-100 text-green-800',
+                    'Payment Receipt Submitted' => 'bg-yellow-100 text-yellow-800',
+                    'Pending Payment' => 'bg-gray-100 text-gray-700',
+                    'In Review' => 'bg-blue-100 text-blue-800',
+                    'Rejected' => 'bg-red-100 text-red-800',
+                    'Closed' => 'bg-gray-200 text-gray-800',
+                    default => 'bg-gray-100 text-gray-700',
+                };
+            @endphp
+
+            @php
+                $paymentBadgeClass = match($applicant->payment_status) {
+                    'Paid' => 'bg-green-100 text-green-800',
+                    'Pending Verification' => 'bg-yellow-100 text-yellow-800',
+                    'Unpaid' => 'bg-gray-100 text-gray-700',
+                    default => 'bg-red-100 text-red-800',
+                };
+            @endphp
+
+            <div class="mt-3 flex flex-wrap gap-2">
+
+                <span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold {{ $appStatusBadgeClass }}">
+                    Application: {{ $applicant->application_status }}
+                </span>
+
+                <span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold {{ $paymentBadgeClass }}">
+                    Payment: {{ $applicant->payment_status }}
+                </span>
+
+            </div>
+
         </div>
 
         <a
@@ -28,6 +63,79 @@
             Back To Dashboard
         </a>
 
+        <!-- View Name of Assigned Staff Section -->
+        <div class="text-sm text-gray-600 font-semibold">
+            Assigned to:
+            {{ $applicant->assignedStaffUser
+                ? $applicant->assignedStaffUser->first_name . ' ' . $applicant->assignedStaffUser->last_name
+                : 'Unassigned'
+            }}
+        </div>
+
+        <!-- Admin/Manager Assignment Form -->
+        @if(in_array(Auth::guard('staff')->user()?->role, ['admin', 'manager']))
+
+            <div class="mt-4">
+
+                <form
+                    method="POST"
+                    action="{{ route('staff.applicants.assign', $applicant->id) }}"
+                    class="flex flex-wrap gap-3 items-center"
+                >
+                    @csrf
+                    @method('PATCH')
+
+                    <select
+                        name="assigned_staff_user_id"
+                        class="border rounded-lg px-4 py-3"
+                    >
+
+                        <option value="">
+                            Unassigned
+                        </option>
+
+                        @foreach($assignableStaffUsers as $staffUser)
+
+                            <option
+                                value="{{ $staffUser->id }}"
+                                @selected((int) $applicant->assigned_staff_user_id === (int) $staffUser->id)
+                            >
+                                {{ $staffUser->first_name }}
+                                {{ $staffUser->last_name }}
+                                ({{ ucfirst($staffUser->role) }})
+                            </option>
+
+                        @endforeach
+
+                    </select>
+
+                    <button
+                        class="bg-green-700 hover:bg-green-800 text-white px-5 py-3 rounded-lg font-semibold"
+                    >
+                        Update Assignment
+                    </button>
+
+                </form>
+
+                @if($applicant->assignedStaffUser)
+
+                    <div class="text-sm text-gray-500 mt-3">
+
+                        Assigned to:
+                        {{ $applicant->assignedStaffUser->first_name }}
+                        {{ $applicant->assignedStaffUser->last_name }}
+
+                        @if($applicant->assigned_at)
+                            · {{ $applicant->assigned_at->format('M d, Y g:i A') }}
+                        @endif
+
+                    </div>
+
+                @endif
+
+            </div>
+
+        @endif
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -376,6 +484,95 @@
     </div>
 </div>
 
+
+<div class="bg-white rounded-2xl shadow p-6 mt-8">
+
+    <h2 class="text-xl font-bold mb-6">
+        Payment History
+    </h2>
+
+    <div class="overflow-x-auto">
+
+        <table class="w-full min-w-[800px]">
+
+            <thead class="bg-gray-100">
+                <tr class="text-left text-sm text-gray-700">
+                    <th class="px-4 py-3">Provider</th>
+                    <th class="px-4 py-3">Reference</th>
+                    <th class="px-4 py-3">Amount</th>
+                    <th class="px-4 py-3">Status</th>
+                    <th class="px-4 py-3">Date</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @forelse($applicant->payments as $payment)
+
+                    <tr class="border-b text-sm">
+                        <td class="px-4 py-3">
+                            {{ ucfirst($payment->provider) }}
+                        </td>
+
+                        <td class="px-4 py-3">
+                            {{ $payment->reference }}
+                        </td>
+
+                        <td class="px-4 py-3">
+                            ₦{{ number_format($payment->amount / 100) }}
+                        </td>
+
+                        <td class="px-4 py-3">
+                            {{ ucfirst(str_replace('_', ' ', $payment->status)) }}
+
+                            @if(
+                                $payment->provider === 'manual_transfer'
+                                &&
+                                $payment->status !== 'success'
+                                &&
+                                in_array(Auth::guard('staff')->user()?->role, ['admin', 'manager'])
+                            )
+
+                                <form
+                                    method="POST"
+                                    action="{{ route('staff.payments.verifyManual', $payment->id) }}"
+                                    class="mt-3"
+                                >
+                                    @csrf
+                                    @method('PATCH')
+
+                                    <button
+                                        class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-xs font-semibold"
+                                    >
+                                        Verify Manual Payment
+                                    </button>
+                                </form>
+
+                            @endif
+                        </td>
+
+                        <td class="px-4 py-3">
+                            {{ $payment->created_at->format('M d, Y g:i A') }}
+                        </td>
+                    </tr>
+
+                @empty
+
+                    <tr>
+                        <td colspan="5" class="px-4 py-6 text-center text-gray-500">
+                            No payment attempts yet.
+                        </td>
+                    </tr>
+
+                @endforelse
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
 
 
 <div class="bg-white rounded-2xl shadow p-6 mt-8">

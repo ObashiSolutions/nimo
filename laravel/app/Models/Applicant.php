@@ -14,6 +14,7 @@ use App\Models\Payment;
 
 
 
+
 class Applicant extends Model
 {
     use HasFactory;
@@ -40,6 +41,8 @@ class Applicant extends Model
         'payment_status',
         'receipt_path',
         'payment_submitted_at',
+        'assigned_staff_user_id',
+        'assigned_at',
 
         // 2. WORK INFORMATION
         'company_name',
@@ -65,6 +68,7 @@ class Applicant extends Model
     protected $casts = [
         'property_cost' => 'integer',
         'years_employed' => 'integer',
+        'assigned_at' => 'datetime',
     ];
 
     public function documents()
@@ -102,5 +106,10 @@ class Applicant extends Model
     public function payments()
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function assignedStaffUser()
+    {
+        return $this->belongsTo(\App\Models\StaffUser::class, 'assigned_staff_user_id');
     }
 }

@@ -107,55 +107,77 @@
             </div>
 
 
-            <!-- Paystack payment form (placeholder for future integration) -->
-            <form
-                method="POST"
-                action="{{ route('paystack.initialize', $applicant->id) }}"
-                class="mb-6"
-            >
-                @csrf
 
-                <button
-                    class="w-full bg-green-700 hover:bg-green-800 text-white py-4 rounded-xl font-bold text-lg"
-                >
-                    Pay Online with Paystack
-                </button>
-            </form>
+            @if($applicant->payment_status === 'Paid')
 
-            <div class="text-center text-gray-500 my-6">
-                OR
-            </div>
-            <form
-                action="{{ route('application.payment.submit', $applicant->id) }}"
-                method="POST"
-                enctype="multipart/form-data"
-                class="space-y-5"
-            >
-                @csrf
+                <div class="bg-green-100 border border-green-300 text-green-800 rounded-xl p-6 text-center">
 
-                <div>
-                    <label class="block text-sm font-semibold mb-2">
-                        Upload Payment Receipt
-                    </label>
+                    <h2 class="text-2xl font-bold mb-2">
+                        Payment Verified
+                    </h2>
 
-                    <input
-                        type="file"
-                        name="payment_receipt"
-                        accept=".jpg,.jpeg,.png,.pdf"
-                        required
-                        class="block w-full text-sm"
-                    >
+                    <p>
+                        Your payment has already been received and verified.
+                    </p>
+
                 </div>
 
-                <button
-                    type="submit"
-                    class="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 rounded-lg"
+            @else
+                <!-- Paystack payment form (placeholder for future integration) -->
+                <form
+                    method="POST"
+                    action="{{ route('paystack.initialize', $applicant->id) }}"
+                    class="mb-6"
                 >
-                    Submit Payment Receipt
-                </button>
+                    @csrf
 
-            </form>
+                    <button
+                        class="w-full bg-green-700 hover:bg-green-800 text-white py-4 rounded-xl font-bold text-lg"
+                    >
+                        Pay Online with Paystack
+                    </button>
+                </form>
 
+                <div class="text-center text-gray-500 my-6">
+                    OR
+                </div>
+                
+                <!-- Payment receipt upload form -->
+                <form
+                    action="{{ route('application.payment.submit', $applicant->id) }}"
+                    method="POST"
+                    enctype="multipart/form-data"
+                    class="space-y-5"
+                >
+                    @csrf
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">
+                            Upload Manual Transfer Receipt
+                        </label>
+
+                        <p class="text-sm text-gray-600 mb-4">
+                            Use this only if you paid by direct bank transfer or had trouble completing online payment.
+                        </p>
+                        
+                        <input
+                            type="file"
+                            name="payment_receipt"
+                            accept=".jpg,.jpeg,.png,.pdf"
+                            required
+                            class="block w-full text-sm"
+                        >
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 rounded-lg"
+                    >
+                        Submit Payment Receipt
+                    </button>
+
+                </form>
+            @endif
         </div>
 
     </div>

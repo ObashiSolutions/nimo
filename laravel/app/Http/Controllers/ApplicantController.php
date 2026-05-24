@@ -12,6 +12,7 @@ use App\Mail\MortgageApplicationReceived;
 use App\Models\ApplicantDocument;
 use App\Mail\PaymentReceiptSubmitted;
 use App\Models\ApplicantTimeline;
+use App\Models\Payment;
 
 
 
@@ -248,6 +249,19 @@ class ApplicantController extends Controller
             'event_type' => 'payment_receipt_uploaded',
             'message' => 'Payment receipt uploaded successfully by applicant. Check email & bank account for authenticity',
             'performed_by' => 'Applicant',
+        ]);
+
+
+        Payment::create([
+            'applicant_id' => $applicant->id,
+            'provider' => 'manual_transfer',
+            'reference' => 'MANUAL-' . strtoupper(\Illuminate\Support\Str::random(10)),
+            'amount' => (int) env('PAYSTACK_PAYMENT_AMOUNT', 20000000),
+            'currency' => 'NGN',
+            'status' => 'pending_verification',
+            'provider_response' => [
+                'receipt_uploaded' => true,
+            ],
         ]);
 
         $applicant->refresh();

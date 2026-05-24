@@ -8,6 +8,12 @@ use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use App\Mail\PaystackPaymentSuccessful;
+use Illuminate\Support\Facades\Mail;
+
+
+
+
 
 class PaystackController extends Controller
 {
@@ -52,9 +58,11 @@ class PaystackController extends Controller
             'message' => 'Paystack payment initialized.',
             'performed_by' => 'Applicant',
         ]);
-
+        
         return redirect($response->json('data.authorization_url'));
     }
+
+    
 
     public function callback(Request $request)
     {
@@ -105,6 +113,21 @@ class PaystackController extends Controller
                 'performed_by' => 'Paystack',
             ]);
 
+            // SEND EMAILS HERE
+            Mail::to(env('MORTGAGE_APPLICATION_EMAIL'))
+                ->send(new PaystackPaymentSuccessful(
+                    $payment->applicant,
+                    $payment,
+                    'admin'
+                ));
+
+            Mail::to($payment->applicant->email)
+                ->send(new PaystackPaymentSuccessful(
+                    $payment->applicant,
+                    $payment,
+                    'applicant'
+                ));
+
             return redirect()->route('application.success');
         }
 
@@ -123,5 +146,89 @@ class PaystackController extends Controller
         return redirect()
             ->route('application.payment', $payment->applicant_id)
             ->withErrors(['payment' => 'Payment was not successful. Please try again or upload manual receipt.']);
+    }
+
+    public function webhook(Request $request)
+    {
+        $secret = env('PAYSTACK_SECRET_KEY');
+
+        $signature = $request->header('x-paystack-signature');
+
+        $computedSignature = hash_hmac(
+            'sha512',
+            $request->getContent(),
+            $secret
+        );
+
+        if (!$signature || $signature !== $computedSignature) {
+            return response()->json([
+                'message' => 'Invalid signature',
+            ], 401);
+        }
+
+        $payload = $request->all();
+
+        if (($payload['event'] ?? null) !== 'charge.success') {
+            return response()->json([
+                'message' => 'Event ignored',
+            ]);
+        }
+
+        $reference = $payload['data']['reference'] ?? null;
+
+        if (!$reference) {
+            return response()->json([
+                'message' => 'No reference found',
+            ], 400);
+        }
+
+        $payment = Payment::where('reference', $reference)->first();
+
+        if (!$payment) {
+            return response()->json([
+                'message' => 'Payment not found',
+            ], 404);
+        }
+
+        if ($payment->status === 'success') {
+            return response()->json([
+                'message' => 'Payment already verified',
+            ]);
+        }
+
+        $paidAmount = (int) ($payload['data']['amount'] ?? 0);
+
+        if ($paidAmount !== (int) $payment->amount) {
+            $payment->update([
+                'status' => 'amount_mismatch',
+                'provider_response' => $payload,
+            ]);
+
+            return response()->json([
+                'message' => 'Amount mismatch',
+            ], 400);
+        }
+
+        $payment->update([
+            'status' => 'success',
+            'provider_response' => $payload,
+        ]);
+
+        $payment->applicant->update([
+            'payment_status' => 'Paid',
+            'application_status' => 'Payment Verified',
+            'payment_submitted_at' => now(),
+        ]);
+
+        ApplicantTimeline::create([
+            'applicant_id' => $payment->applicant_id,
+            'event_type' => 'paystack_webhook_verified',
+            'message' => 'Paystack payment verified by webhook.',
+            'performed_by' => 'Paystack',
+        ]);
+
+        return response()->json([
+            'message' => 'Payment verified successfully',
+        ]);
     }
 }

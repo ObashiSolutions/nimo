@@ -5,11 +5,26 @@ namespace App\Http\Controllers;
 use App\Models\Applicant;
 use Illuminate\Support\Facades\Storage;
 use ZipArchive;
+use Illuminate\Support\Facades\Auth;
+
+
 
 class StaffDocumentZipController extends Controller
 {
     public function download(Applicant $applicant)
     {
+        $currentStaffUser = Auth::guard('staff')->user();
+
+        if (
+            $currentStaffUser
+            &&
+            in_array($currentStaffUser->role, ['reviewer', 'support'])
+            &&
+            (int) $applicant->assigned_staff_user_id !== (int) $currentStaffUser->id
+        ) {
+            abort(403);
+        }
+        
         $applicant->load('documents');
 
         if ($applicant->documents->count() <= 1) {

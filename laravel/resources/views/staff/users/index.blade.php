@@ -22,10 +22,15 @@
             <input type="password" name="password" placeholder="Temporary Password" class="border rounded-lg px-4 py-3" required autocomplete="new-password">
 
             <select name="role" class="border rounded-lg px-4 py-3" required>
-                <option value="support">Support</option>
+                <option value="">Select Role</option>
+
+                @if(Auth::guard('staff')->user()?->role === 'admin')
+                    <option value="admin">Admin</option>
+                    <option value="manager">Manager</option>
+                @endif
+
                 <option value="reviewer">Reviewer</option>
-                <option value="manager">Manager</option>
-                <option value="admin">Admin</option>
+                <option value="support">Support</option>
             </select>
 
             <button class="bg-green-800 hover:bg-green-900 text-white rounded-lg px-5 py-3 font-semibold">

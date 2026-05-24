@@ -13,6 +13,19 @@ class ApplicantNoteController extends Controller
 {
     public function store(Request $request, Applicant $applicant)
     {
+        
+        $currentStaffUser = Auth::guard('staff')->user();
+
+        if (
+            $currentStaffUser
+            &&
+            in_array($currentStaffUser->role, ['reviewer', 'support'])
+            &&
+            (int) $applicant->assigned_staff_user_id !== (int) $currentStaffUser->id
+        ) {
+            abort(403);
+        }
+    
         $request->validate([
             'note' => 'required|string|max:5000',
         ]);

@@ -1,3 +1,7 @@
+<!-- /views/staff.blade 
+    This is the main layout for all staff-related pages. It includes a sidebar for navigation and a header for page titles and user info.
+    Individual pages will extend this layout and fill in the content section.
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -46,59 +50,100 @@
             </div>
 
             <nav class="flex-1 px-4 py-6 space-y-2 text-sm">
+                @php
+                    $currentStaffUser = Auth::guard('staff')->user();
+                    $currentStaffUserRole = $currentStaffUser?->role;
+                    $currentStaffUserId = Auth::guard('staff')->id();
+                    $canManageStaff = in_array($currentStaffUserRole, ['admin', 'manager']);
+                    $isDashboard = request()->routeIs('staff.dashboard');
+                    $isMyAssigned = (string) request('assigned_to') === (string) $currentStaffUserId;
+                    $overdueTasksCount = $overdueTasksCount
+                        ?? \App\Models\ApplicantTask::where('status', '!=', 'Completed')
+                            ->whereDate('due_date', '<', now())
+                            ->count();
+                    $pendingPaymentsCount = $pendingPaymentsCount
+                        ?? \App\Models\Payment::where('provider', 'manual_transfer')
+                            ->where('status', 'pending_verification')
+                            ->count();
+                @endphp
 
                 <a
                     href="{{ route('staff.dashboard') }}"
-                    class="block px-4 py-3 rounded-lg {{ request()->routeIs('staff.dashboard') ? 'bg-green-800' : 'hover:bg-green-800' }}"
+                    class="block px-4 py-3 rounded-lg {{ $isDashboard && !$isMyAssigned ? 'bg-green-700 text-white' : 'hover:bg-green-700 hover:text-white' }}"
                 >
                     Dashboard
                 </a>
 
-                <a href="{{ route('staff.dashboard') }}" class="block px-4 py-3 rounded-lg hover:bg-green-800">
+                <a
+                    href="{{ route('staff.dashboard') }}"
+                    class="block px-4 py-3 rounded-lg {{ request()->routeIs('staff.applications.*') ? 'bg-green-700 text-white' : 'hover:bg-green-700 hover:text-white' }}"
+                >
                     Applications
                 </a>
 
-                <a  href="{{ route('staff.tasks.index') }}" 
-                    class="block px-4 py-3 rounded-lg {{ request()->routeIs('staff.tasks.*') ? 'bg-green-800' : 'hover:bg-green-800' }}">
-                    
+                <a
+                    href="{{ route('staff.dashboard', ['assigned_to' => $currentStaffUserId]) }}"
+                    class="block px-4 py-3 rounded-lg {{ $isMyAssigned ? 'bg-green-700 text-white' : 'hover:bg-green-700 hover:text-white' }}"
+                >
+                    My Assigned
+                </a>
+
+                <a
+                    href="{{ route('staff.tasks.index') }}"
+                    class="block px-4 py-3 rounded-lg {{ request()->routeIs('staff.tasks.*') ? 'bg-green-700 text-white' : 'hover:bg-green-700 hover:text-white' }}"
+                >
                     Tasks / Follow Ups
 
-                    @php
-                        $overdueTasksCount =
-                            \App\Models\ApplicantTask::where('status', '!=', 'Completed')
-                                ->whereDate('due_date', '<', now())
-                                ->count();
-                    @endphp
-
-                    @if($overdueTasksCount > 0)
-                        <span class="ml-2 inline-flex items-center justify-center bg-red-600 text-white text-xs font-bold rounded-full px-2 py-1">
+                    @if(($overdueTasksCount ?? 0) > 0)
+                        <span class="ml-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full">
                             {{ $overdueTasksCount }}
                         </span>
                     @endif
                 </a>
 
-                <a
-                    href="{{ route('staff.applications.exportCsv') }}"
-                    class="block px-4 py-3 rounded-lg {{ request()->routeIs('staff.applications.exportCsv') ? 'bg-green-800' : 'hover:bg-green-800' }}"
-                >
-                    Reports / Export
-                </a>
-
-                @php
-                    $staffRole = Auth::guard('staff')->user()?->role;
-                @endphp
-
-                @if(in_array($staffRole, ['admin', 'manager']))
-                <a
-                    href="{{ route('staff.users.index') }}"
-                    class="block px-4 py-3 rounded-lg {{ request()->routeIs('staff.users.*') ? 'bg-green-800' : 'hover:bg-green-800' }}"
-                >
-                    Staff Users
-                </a>
+                @if($canManageStaff)
+                    <a
+                        href="{{ route('staff.users.index') }}"
+                        class="block px-4 py-3 rounded-lg {{ request()->routeIs('staff.users.*') ? 'bg-green-700 text-white' : 'hover:bg-green-700 hover:text-white' }}"
+                    >
+                        Staff Users
+                    </a>
                 @endif
 
+                @if($canManageStaff)
+                    <a
+                        href="{{ route('staff.applications.exportCsv') }}"
+                        class="block px-4 py-3 rounded-lg {{ request()->routeIs('staff.applications.exportCsv') ? 'bg-green-700 text-white' : 'hover:bg-green-700 hover:text-white' }}"
+                    >
+                        Reports / Export
+                    </a>
+                @endif
+
+                <a
+                    href="{{ route('staff.profile.edit') }}"
+                    class="block px-4 py-3 rounded-lg {{ request()->routeIs('staff.profile.*') ? 'bg-green-700 text-white' : 'hover:bg-green-700 hover:text-white' }}"
+                >
+                    My Profile
+                </a>
+
+                @if($canManageStaff)
+                    <a
+                        href="{{ route('staff.payments.index') }}"
+                        class="block px-4 py-3 rounded-lg {{ request()->routeIs('staff.payments.*') ? 'bg-green-700 text-white' : 'hover:bg-green-700 hover:text-white' }}"
+                    >
+                        Payments
+
+                        @if(($pendingPaymentsCount ?? 0) > 0)
+                            <span class="ml-2 bg-yellow-400 text-white text-xs px-2 py-1 rounded-full">
+                                {{ $pendingPaymentsCount }}
+                            </span>
+                        @endif
+                    </a>
+                @endif
             </nav>
 
+            
+            
             <div class="p-4 border-t border-green-800">
                 <form method="POST" action="{{ route('staff.logout') }}">
                     @csrf
@@ -119,8 +164,8 @@
 
         <header class="bg-white border-b px-8 py-5">
             <div class="flex items-center justify-between gap-4">
-                <div class="min-w-fit">
-                    
+
+                <div>
                     <h2 class="text-2xl font-bold text-gray-900">
                         {{ $pageTitle ?? 'Staff Area' }}
                     </h2>
@@ -128,123 +173,64 @@
                     <p class="text-sm text-gray-500">
                         {{ $pageSubtitle ?? 'Nigeria Mortgages internal operations' }}
                     </p>
-
                 </div>
 
                 <div class="flex items-center gap-4">
 
                     {{-- Notification Bell --}}
                     <button
-                        class="relative bg-gray-100 hover:bg-gray-200 transition p-3 rounded-full"
+                        type="button"
+                        class="relative bg-gray-100 hover:bg-gray-200 rounded-full p-3"
                     >
-
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                            class="h-6 w-6 text-gray-700"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11
-                                a6.002 6.002 0 00-4-5.659V5
-                                a2 2 0 10-4 0v.341C7.67 6.165
-                                6 8.388 6 11v3.159c0 .538-.214
-                                1.055-.595 1.436L4 17h5m6
-                                0v1a3 3 0 11-6 0v-1m6 0H9"
-                            />
-                        </svg>
-
-                        @php
-                            $newApplicantsCount =
-                                \App\Models\Applicant::whereDate('created_at', today())
-                                    ->count();
-                        @endphp
-
-                        @if($newApplicantsCount > 0)
-
-                            <span
-                                class="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center"
-                            >
-                                {{ $newApplicantsCount }}
-                            </span>
-
-                        @endif
-
+                        🔔
                     </button>
+                    
+                    
+                    {{-- Staff Name / Role --}}
+                    <div class="text-right hidden md:block">
+                        <div class="text-sm font-semibold text-gray-800">
+                            {{ Auth::guard('staff')->user()->first_name ?? 'Staff' }}
+                        </div>
 
-                    {{-- Internal Access --}}
-                    <div class="text-sm text-gray-500 whitespace-nowrap">
-                        {{ Auth::guard('staff')->user()->first_name ?? 'Staff' }}
-                        ·
-                        {{ ucfirst(Auth::guard('staff')->user()->role ?? 'staff') }}
+                        <div class="text-xs text-gray-500">
+                            {{ ucfirst(Auth::guard('staff')->user()->role ?? 'staff') }}
+                        </div>
                     </div>
 
-                </div>
+                    {{-- Avatar Dropdown --}}
+                    <div class="relative">
 
-            </div>
+                        <button
+                            type="button"
+                            onclick="document.getElementById('avatarDropdown').classList.toggle('hidden')"
+                            class="h-10 w-10 rounded-full bg-green-800 text-white flex items-center justify-center font-bold"
+                        >
+                            {{ strtoupper(substr(Auth::guard('staff')->user()->first_name ?? 'S', 0, 1)) }}
+                        </button>
 
+                        <div
+                            id="avatarDropdown"
+                            class="hidden absolute right-0 mt-3 w-48 bg-white border rounded-xl shadow-lg z-[99999]"
+                        >
+                            <a
+                                href="{{ route('staff.profile.edit') }}"
+                                class="block px-5 py-3 text-sm hover:bg-gray-100"
+                            >
+                                My Profile
+                            </a>
 
-            <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <form method="POST" action="{{ route('staff.logout') }}">
+                                @csrf
 
-                <div class="bg-green-100 border border-green-200 rounded-xl px-5 py-4">
+                                <button
+                                    class="w-full text-left px-5 py-3 text-sm text-red-600 hover:bg-red-50"
+                                >
+                                    Logout
+                                </button>
+                            </form>
+                        </div>
 
-                    <p class="text-xs uppercase tracking-wide text-green-700 font-semibold">
-                        Applications Today
-                    </p>
-
-                    <p class="text-2xl font-bold text-green-900 mt-2">
-
-                        {{ \App\Models\Applicant::whereDate('created_at', today())->count() }}
-
-                    </p>
-
-                </div>
-
-                <div class="bg-yellow-100 border border-yellow-200 rounded-xl px-5 py-4">
-
-                    <p class="text-xs uppercase tracking-wide text-yellow-700 font-semibold">
-                        Pending Verification
-                    </p>
-
-                    <p class="text-2xl font-bold text-yellow-900 mt-2">
-
-                        {{ \App\Models\Applicant::where('payment_status', 'Pending Verification')->count() }}
-
-                    </p>
-
-                </div>
-
-                <div class="bg-blue-100 border border-blue-200 rounded-xl px-5 py-4">
-
-                    <p class="text-xs uppercase tracking-wide text-blue-700 font-semibold">
-                        In Review
-                    </p>
-
-                    <p class="text-2xl font-bold text-blue-900 mt-2">
-
-                        {{ \App\Models\Applicant::where('application_status', 'In Review')->count() }}
-
-                    </p>
-
-                </div>
-
-                <div class="bg-red-100 border border-red-200 rounded-xl px-5 py-4">
-
-                    <p class="text-xs uppercase tracking-wide text-red-700 font-semibold">
-                        Overdue Tasks
-                    </p>
-
-                    <p class="text-2xl font-bold text-red-900 mt-2">
-
-                        {{ \App\Models\ApplicantTask::where('status', '!=', 'Completed')
-                            ->whereDate('due_date', '<', now())
-                            ->count()
-                        }}
-
-                    </p>
+                    </div>
 
                 </div>
 
@@ -267,9 +253,7 @@
             </div>
         @endif
 
-        <div class="overflow-x-hidden">
-            @yield('content')
-        </div>
+        @yield('content')
 
     </main>
 
