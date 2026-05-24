@@ -271,9 +271,6 @@ class ApplicantController extends Controller
 
         return redirect()
             ->route('application.success')
-            ->with(
-                'success_message',
-                'Your payment receipt has been acknowledged successfully. We shall contact you via email along with a WhatsApp notification within 24 hours. Please keep your WhatsApp open.'
-            );
+            ->with('success_type', 'manual_receipt');
     }
 }

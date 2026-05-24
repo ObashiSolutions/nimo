@@ -97,7 +97,9 @@ class FlutterwaveController extends Controller
         }
 
         if ($payment->status === 'success') {
-            return redirect()->route('application.success');
+            return redirect()
+                ->route('application.success')
+                ->with('success_type', 'online_payment');
         }
 
         $expectedAmount = $payment->amount / 100;
@@ -140,7 +142,9 @@ class FlutterwaveController extends Controller
                     'applicant'
                 ));
 
-            return redirect()->route('application.success');
+            return redirect()
+                ->route('application.success')
+                ->with('success_type', 'online_payment');
         }
 
         $payment->update([
