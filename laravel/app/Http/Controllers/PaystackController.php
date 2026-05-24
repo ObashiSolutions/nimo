@@ -128,7 +128,9 @@ class PaystackController extends Controller
                     'applicant'
                 ));
 
-            return redirect()->route('application.success');
+            return redirect()
+                ->route('application.success')
+                ->with('success_type', 'online_payment');
         }
 
         $payment->update([
