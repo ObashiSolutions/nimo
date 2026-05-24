@@ -51,6 +51,10 @@ class StaffDashboardController extends Controller
 
         if ($search) {
             $applicantColumns = Schema::getColumnListing('applicants');
+            $searchTerms = collect(preg_split('/\s+/', trim($search)))
+                ->filter()
+                ->map(fn ($term) => mb_strtolower($term))
+                ->values();
 
             $ignoreColumns = [
                 'id',
@@ -61,17 +65,23 @@ class StaffDashboardController extends Controller
 
             $searchableColumns = array_diff($applicantColumns, $ignoreColumns);
 
-            $query->where(function ($q) use ($search, $searchableColumns) {
-                foreach ($searchableColumns as $column) {
-                    $q->orWhere($column, 'like', "%{$search}%");
-                }
+            $query->where(function ($q) use ($searchTerms, $searchableColumns) {
+                foreach ($searchTerms as $term) {
+                    $q->where(function ($termQuery) use ($term, $searchableColumns) {
+                        foreach ($searchableColumns as $column) {
+                            $wrappedColumn = $termQuery->getQuery()->getGrammar()->wrap($column);
 
-                $q->orWhereHas('assignedStaffUser', function ($staffQuery) use ($search) {
-                    $staffQuery->where('first_name', 'like', "%{$search}%")
-                        ->orWhere('last_name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%")
-                        ->orWhere('role', 'like', "%{$search}%");
-                });
+                            $termQuery->orWhereRaw("LOWER({$wrappedColumn}) LIKE ?", ["%{$term}%"]);
+                        }
+
+                        $termQuery->orWhereHas('assignedStaffUser', function ($staffQuery) use ($term) {
+                            $staffQuery->whereRaw('LOWER(first_name) LIKE ?', ["%{$term}%"])
+                                ->orWhereRaw('LOWER(last_name) LIKE ?', ["%{$term}%"])
+                                ->orWhereRaw('LOWER(email) LIKE ?', ["%{$term}%"])
+                                ->orWhereRaw('LOWER(role) LIKE ?', ["%{$term}%"]);
+                        });
+                    });
+                }
             });
         }
 
@@ -100,8 +110,8 @@ class StaffDashboardController extends Controller
             ->withQueryString();
 
         $assignableStaffUsers = StaffUser::where('is_active', true)
-            ->orderBy('first_name')
-            ->orderBy('last_name')
+            ->orderByRaw('LOWER(first_name)')
+            ->orderByRaw('LOWER(last_name)')
             ->get();
 
         return view(

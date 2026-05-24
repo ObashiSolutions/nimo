@@ -25,12 +25,12 @@
                             <div class="flex flex-wrap items-center gap-3">
                                 <form method="GET" class="flex flex-wrap items-center gap-3">
                                     <input
-                                        type="text"
-                                        name="search"
+                                        type="search"
+                                        id="applicantLiveSearch"
                                         value="{{ request('search') }}"
-                                        placeholder="Search applicants..."
+                                        placeholder="Search visible applicants..."
                                         class="border rounded-lg px-4 py-2 w-72"
-                                        oninput="liveSearchApplicants(this)"
+                                        autocomplete="off"
                                     >
                                       
                                     
@@ -248,6 +248,15 @@
                                 <thead class="sticky top-0 z-20 bg-gray-100 border-b ">
                                     <tr class="text-left text-sm text-gray-700">
                                         <th class="px-4 py-3 whitespace-nowrap">
+                                            <input
+                                                id="selectAllApplicants"
+                                                type="checkbox"
+                                                class="h-4 w-4 rounded border-gray-300"
+                                                aria-label="Select all visible applicants"
+                                            >
+                                        </th>
+
+                                        <th class="px-4 py-3 whitespace-nowrap">
                                             <a href="{{ route('staff.dashboard', array_merge(request()->query(), ['sort' => 'reference_id', 'direction' => request('direction') === 'asc' ? 'desc' : 'asc'])) }}">
                                                 Reference ID
                                             </a>
@@ -316,12 +325,49 @@
                                 <tbody>
 
                                     @forelse($applicants as $applicant)
+                                        @php
+                                            $applicantSearchText = collect([
+                                                $applicant->reference_id,
+                                                $applicant->first_name,
+                                                $applicant->last_name,
+                                                $applicant->email,
+                                                $applicant->assignedStaffUser
+                                                    ? $applicant->assignedStaffUser->first_name . ' ' . $applicant->assignedStaffUser->last_name
+                                                    : 'Unassigned',
+                                                $applicant->phone_number,
+                                                $applicant->address,
+                                                $applicant->city,
+                                                $applicant->state,
+                                                $applicant->company_name,
+                                                $applicant->occupation,
+                                                $applicant->years_employed,
+                                                $applicant->estate_name,
+                                                $applicant->property_cost,
+                                                $applicant->application_status,
+                                                $applicant->payment_status,
+                                                $applicant->documents->pluck('original_name')->implode(' '),
+                                                $applicant->receipt_path ? 'View Receipt Receipt' : 'No Receipt',
+                                                $applicant->created_at->format('M d, Y g:i A'),
+                                            ])->filter()->implode(' ');
+                                        @endphp
 
                                         <tr
                                             onclick="window.location='{{ route('staff.applications.show', $applicant->id) }}'"
                                             class="border-b hover:bg-gray-50 transition text-sm align-top applicant-row cursor-pointer"
                                             data-status="{{ $applicant->application_status }}"
+                                            data-search="{{ e($applicantSearchText) }}"
                                         >
+                                            <td class="px-4 py-3 whitespace-nowrap">
+                                                <input
+                                                    type="checkbox"
+                                                    name="selected_applicants[]"
+                                                    value="{{ $applicant->id }}"
+                                                    class="applicant-row-checkbox h-4 w-4 rounded border-gray-300"
+                                                    aria-label="Select applicant {{ $applicant->reference_id }}"
+                                                    onclick="event.stopPropagation()"
+                                                >
+                                            </td>
+
                                             <td class="px-4 py-3 whitespace-nowrap font-semibold">
                                                 {{ $applicant->reference_id }}
                                             </td>
@@ -532,12 +578,18 @@
                                     @empty
 
                                         <tr>
-                                            <td colspan="18" class="px-4 py-8 text-center text-gray-500">
+                                            <td colspan="20" class="px-4 py-8 text-center text-gray-500">
 
                                                 No applications found.
                                             </td>
                                         </tr>
                                     @endforelse
+
+                                    <tr id="noLiveSearchResults" class="hidden">
+                                        <td colspan="20" class="px-4 py-8 text-center text-gray-500">
+                                            No visible applications match your search.
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                             </div>
@@ -580,15 +632,73 @@
             </script>
 
             <script>
-                let applicantSearchTimer;
+                const applicantLiveSearch = document.getElementById('applicantLiveSearch');
+                const selectAllApplicants = document.getElementById('selectAllApplicants');
+                const applicantRows = Array.from(document.querySelectorAll('.applicant-row'));
+                const noLiveSearchResults = document.getElementById('noLiveSearchResults');
 
-                function liveSearchApplicants(input) {
-                    clearTimeout(applicantSearchTimer);
-
-                    applicantSearchTimer = setTimeout(function () {
-                        input.form.submit();
-                    }, 500);
+                function normalizeApplicantSearch(value) {
+                    return (value || '').toString().toLowerCase().replace(/\s+/g, ' ').trim();
                 }
+
+                function visibleApplicantRows() {
+                    return applicantRows.filter((row) => !row.classList.contains('hidden'));
+                }
+
+                function updateSelectedApplicantsState() {
+                    if (!selectAllApplicants) {
+                        return;
+                    }
+
+                    const checkboxes = visibleApplicantRows()
+                        .map((row) => row.querySelector('.applicant-row-checkbox'))
+                        .filter(Boolean);
+                    const checkedCount = checkboxes.filter((checkbox) => checkbox.checked).length;
+
+                    selectAllApplicants.checked = checkboxes.length > 0 && checkedCount === checkboxes.length;
+                    selectAllApplicants.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
+                }
+
+                function filterApplicantsBySearch() {
+                    const terms = normalizeApplicantSearch(applicantLiveSearch?.value)
+                        .split(' ')
+                        .filter(Boolean);
+                    let visibleCount = 0;
+
+                    applicantRows.forEach((row) => {
+                        const rowSearchText = normalizeApplicantSearch(row.dataset.search);
+                        const matches = terms.every((term) => rowSearchText.includes(term));
+
+                        row.classList.toggle('hidden', !matches);
+
+                        if (matches) {
+                            visibleCount += 1;
+                        }
+                    });
+
+                    noLiveSearchResults?.classList.toggle('hidden', visibleCount !== 0);
+                    updateSelectedApplicantsState();
+                }
+
+                applicantLiveSearch?.addEventListener('input', filterApplicantsBySearch);
+
+                selectAllApplicants?.addEventListener('change', function () {
+                    visibleApplicantRows().forEach((row) => {
+                        const checkbox = row.querySelector('.applicant-row-checkbox');
+
+                        if (checkbox) {
+                            checkbox.checked = selectAllApplicants.checked;
+                        }
+                    });
+
+                    updateSelectedApplicantsState();
+                });
+
+                document.querySelectorAll('.applicant-row-checkbox').forEach((checkbox) => {
+                    checkbox.addEventListener('change', updateSelectedApplicantsState);
+                });
+
+                filterApplicantsBySearch();
             </script>
 
 @endsection

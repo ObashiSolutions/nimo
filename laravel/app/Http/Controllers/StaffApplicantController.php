@@ -33,9 +33,10 @@ class StaffApplicantController extends Controller
             'assignedStaffUser',
         ]);
 
-    $assignableStaffUsers = StaffUser::where('is_active', true)
-    ->orderBy('first_name')
-    ->get();
+        $assignableStaffUsers = StaffUser::where('is_active', true)
+            ->orderByRaw('LOWER(first_name)')
+            ->orderByRaw('LOWER(last_name)')
+            ->get();
     
         return view('staff.show-applicant', compact('applicant', 'assignableStaffUsers'));
     }
