@@ -105,15 +105,43 @@
                 banking partner.
             </div>
 
-            <!-- Placeholder for future online payment integration -->
-            <div class="mt-6 border border-dashed border-gray-300 rounded-xl p-5 bg-gray-50">
-                <h3 class="font-bold text-lg mb-2">
-                    Online Payment Options Coming Soon
+            <!-- Online payment options -->
+            <div class="mt-6 border rounded-xl p-5 bg-gray-50">
+
+                <h3 class="font-bold text-lg mb-4">
+                    Online Payment Options
                 </h3>
 
-                <p class="text-sm text-gray-600 leading-relaxed">
-                    This section is reserved for Paystack, Flutterwave, Remita, and direct card/bank-transfer integrations. Once enabled, applicants will be able to pay securely online and return automatically to the confirmation page.
-                </p>
+                <div class="space-y-4">
+
+                    <form
+                        method="POST"
+                        action="{{ route('paystack.initialize', $applicant->id) }}"
+                    >
+                        @csrf
+
+                        <button
+                            class="w-full bg-green-700 hover:bg-green-800 text-white py-4 rounded-xl font-bold"
+                        >
+                            Pay Online with Paystack
+                        </button>
+                    </form>
+
+                    <form
+                        method="POST"
+                        action="{{ route('flutterwave.initialize', $applicant->id) }}"
+                    >
+                        @csrf
+
+                        <button
+                            class="w-full bg-orange-600 hover:bg-orange-700 text-white py-4 rounded-xl font-bold"
+                        >
+                            Pay Online with Flutterwave
+                        </button>
+                    </form>
+
+                </div>
+
             </div>
 
 

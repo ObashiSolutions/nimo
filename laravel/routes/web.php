@@ -19,6 +19,7 @@ use App\Http\Controllers\StaffPaymentController;
 use App\Http\Controllers\StaffAssignmentController;
 use App\Http\Controllers\StaffProfileController;
 use App\Http\Controllers\StaffPaymentReportController;
+use App\Http\Controllers\FlutterwaveController; // For Flutterwave payment integration
 
 
 
