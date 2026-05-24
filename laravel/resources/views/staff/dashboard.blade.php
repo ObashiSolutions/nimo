@@ -26,6 +26,7 @@
                                 <form method="GET" class="flex flex-wrap items-center gap-3">
                                     <input
                                         type="search"
+                                        name="search"
                                         id="applicantLiveSearch"
                                         value="{{ request('search') }}"
                                         placeholder="Search visible applicants..."
@@ -636,6 +637,7 @@
                 const selectAllApplicants = document.getElementById('selectAllApplicants');
                 const applicantRows = Array.from(document.querySelectorAll('.applicant-row'));
                 const noLiveSearchResults = document.getElementById('noLiveSearchResults');
+                let applicantServerSearchTimer;
 
                 function normalizeApplicantSearch(value) {
                     return (value || '').toString().toLowerCase().replace(/\s+/g, ' ').trim();
@@ -680,7 +682,14 @@
                     updateSelectedApplicantsState();
                 }
 
-                applicantLiveSearch?.addEventListener('input', filterApplicantsBySearch);
+                applicantLiveSearch?.addEventListener('input', function () {
+                    filterApplicantsBySearch();
+                    clearTimeout(applicantServerSearchTimer);
+
+                    applicantServerSearchTimer = setTimeout(function () {
+                        applicantLiveSearch.form?.submit();
+                    }, 500);
+                });
 
                 selectAllApplicants?.addEventListener('change', function () {
                     visibleApplicantRows().forEach((row) => {
