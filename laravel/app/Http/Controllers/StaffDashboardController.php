@@ -15,10 +15,12 @@ class StaffDashboardController extends Controller
         $search = request('search');
         $status = request('status');
         $assignedTo = request('assigned_to');
-        $sort = request('sort', 'created_at');
+        $sort = request('sort', 'latest');
         $direction = request('direction', 'desc');
 
         $allowedSorts = [
+            'latest',
+            'oldest',
             'reference_id',
             'first_name',
             'last_name',
@@ -30,7 +32,7 @@ class StaffDashboardController extends Controller
         ];
 
         if (!in_array($sort, $allowedSorts)) {
-            $sort = 'created_at';
+            $sort = 'latest';
         }
 
         if (!in_array($direction, ['asc', 'desc'])) {
@@ -53,8 +55,6 @@ class StaffDashboardController extends Controller
 
             $ignoreColumns = [
                 'id',
-                'created_at',
-                'updated_at',
                 'deleted_at',
             ];
 
@@ -86,7 +86,13 @@ class StaffDashboardController extends Controller
             $query->where('assigned_staff_user_id', $assignedTo);
         }
 
-        $query->orderBy($sort, $direction);
+        if ($sort === 'oldest') {
+            $query->orderBy('created_at', 'asc');
+        } elseif ($sort === 'latest') {
+            $query->orderBy('created_at', 'desc');
+        } else {
+            $query->orderBy($sort, $direction);
+        }
 
         $applicants = $query
             ->paginate($perPage)
