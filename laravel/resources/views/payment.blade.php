@@ -116,6 +116,19 @@
 
                     <form
                         method="POST"
+                        action="{{ route('flutterwave.initialize', $applicant->id) }}"
+                    >
+                        @csrf
+
+                        <button
+                            class="w-full bg-orange-600 hover:bg-orange-700 text-white py-4 rounded-xl font-bold"
+                        >
+                            Pay Online with Flutterwave
+                        </button>
+                    </form>
+                    
+                    <form
+                        method="POST"
                         action="{{ route('paystack.initialize', $applicant->id) }}"
                     >
                         @csrf
@@ -127,19 +140,7 @@
                         </button>
                     </form>
 
-                    <form
-                        method="POST"
-                        action="{{ route('flutterwave.initialize', $applicant->id) }}"
-                    >
-                        @csrf
-
-                        <button
-                            class="w-full bg-orange-600 hover:bg-orange-700 text-white py-4 rounded-xl font-bold"
-                        >
-                            Pay Online with Flutterwave
-                        </button>
-                    </form>
-
+                    
                 </div>
 
             </div>
