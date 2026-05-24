@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Applicant;
+use App\Models\StaffUser;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 
 class StaffDashboardController extends Controller
 {
@@ -34,41 +36,51 @@ class StaffDashboardController extends Controller
         if (!in_array($direction, ['asc', 'desc'])) {
             $direction = 'desc';
         }
-        
 
-        // Start building the query with eager loading of documents
-        $query = Applicant::with('documents', 'assignedStaffUser',);
+        $query = Applicant::with('documents', 'assignedStaffUser');
 
         $currentStaffUser = Auth::guard('staff')->user();
 
         if (
-            $currentStaffUser
-            &&
+            $currentStaffUser &&
             in_array($currentStaffUser->role, ['reviewer', 'support'])
         ) {
             $query->where('assigned_staff_user_id', $currentStaffUser->id);
         }
 
         if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('reference_id', 'like', "%{$search}%")
-                    ->orWhere('first_name', 'like', "%{$search}%")
-                    ->orWhere('last_name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('phone_number', 'like', "%{$search}%")
-                    ->orWhere('company_name', 'like', "%{$search}%")
-                    ->orWhere('estate_name', 'like', "%{$search}%");
+            $applicantColumns = Schema::getColumnListing('applicants');
+
+            $ignoreColumns = [
+                'id',
+                'created_at',
+                'updated_at',
+                'deleted_at',
+            ];
+
+            $searchableColumns = array_diff($applicantColumns, $ignoreColumns);
+
+            $query->where(function ($q) use ($search, $searchableColumns) {
+                foreach ($searchableColumns as $column) {
+                    $q->orWhere($column, 'like', "%{$search}%");
+                }
+
+                $q->orWhereHas('assignedStaffUser', function ($staffQuery) use ($search) {
+                    $staffQuery->where('first_name', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('role', 'like', "%{$search}%");
+                });
             });
         }
+
         if ($status) {
             $query->where('application_status', $status);
         }
-        
+
         if (
-            $assignedTo
-            &&
-            $currentStaffUser
-            &&
+            $assignedTo &&
+            $currentStaffUser &&
             in_array($currentStaffUser->role, ['admin', 'manager'])
         ) {
             $query->where('assigned_staff_user_id', $assignedTo);
@@ -79,11 +91,12 @@ class StaffDashboardController extends Controller
         $applicants = $query
             ->paginate($perPage)
             ->withQueryString();
-        
-        $assignableStaffUsers = \App\Models\StaffUser::where('is_active', true)
+
+        $assignableStaffUsers = StaffUser::where('is_active', true)
             ->orderBy('first_name')
+            ->orderBy('last_name')
             ->get();
-        
+
         return view(
             'staff.dashboard',
             compact('applicants', 'assignableStaffUsers')
