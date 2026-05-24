@@ -101,7 +101,7 @@
 
             <!-- Instructions for applicants -->
             <div class="text-sm text-gray-600 leading-relaxed">
-                You may transfer directly or use the <strong> Online Payment Options</strong>. If you have already made a transfer, please upload your payment receipt below. Once acknowledged, your application will be matched with a mortgage specialist from an MREIF-affiliated
+                You may transfer directly or use the <strong> Online Payment Options</strong> below. <br>If you have already made a transfer, please use <strong>Upload Manual Transfer Receipt</strong> below. Once acknowledged, your application will be matched with a mortgage specialist from an MREIF-affiliated
                 banking partner.
             </div>
 
