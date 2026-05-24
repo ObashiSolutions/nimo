@@ -28,11 +28,10 @@ class StaffDashboardController extends Controller
             'property_cost',
             'application_status',
             'payment_status',
-            'created_at',
         ];
 
         if (!in_array($sort, $allowedSorts)) {
-            $sort = 'latest';
+            $sort = 'created_at';
         }
 
         if (!in_array($direction, ['asc', 'desc'])) {
@@ -55,6 +54,8 @@ class StaffDashboardController extends Controller
 
             $ignoreColumns = [
                 'id',
+                'created_at',
+                'updated_at',
                 'deleted_at',
             ];
 
