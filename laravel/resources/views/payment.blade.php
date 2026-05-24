@@ -177,7 +177,7 @@
                     @csrf
 
                     <div>
-                        <label class="block text-xl font-semibold mb-2">
+                        <label class="block text-xl font-semibold mb-2 text-center">
                             Upload Manual Transfer Receipt
                         </label>
 
