@@ -71,7 +71,7 @@ class StaffDashboardController extends Controller
                         foreach ($searchableColumns as $column) {
                             $wrappedColumn = $termQuery->getQuery()->getGrammar()->wrap($column);
 
-                            $termQuery->orWhereRaw("LOWER({$wrappedColumn}) LIKE ?", ["%{$term}%"]);
+                            $termQuery->orWhereRaw("LOWER(CAST({$wrappedColumn} AS TEXT)) LIKE ?", ["%{$term}%"]);
                         }
 
                         $termQuery->orWhereHas('assignedStaffUser', function ($staffQuery) use ($term) {
