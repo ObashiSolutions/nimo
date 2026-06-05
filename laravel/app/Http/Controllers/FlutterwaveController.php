@@ -128,7 +128,7 @@ class FlutterwaveController extends Controller
                 'performed_by' => 'Flutterwave',
             ]);
 
-            Mail::to(env('MORTGAGE_APPLICATION_EMAIL'))
+            Mail::to(config('mail.admin_address'))
                 ->send(new FlutterwavePaymentSuccessful(
                     $payment->applicant,
                     $payment,

@@ -114,7 +114,7 @@ class PaystackController extends Controller
             ]);
 
             // SEND EMAILS HERE
-            Mail::to(env('MORTGAGE_APPLICATION_EMAIL'))
+            Mail::to(config('mail.admin_address'))
                 ->send(new PaystackPaymentSuccessful(
                     $payment->applicant,
                     $payment,

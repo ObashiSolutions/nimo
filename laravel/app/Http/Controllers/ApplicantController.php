@@ -181,7 +181,7 @@ class ApplicantController extends Controller
         ];
 
         //Mail details to me
-        Mail::to(env('MORTGAGE_APPLICATION_EMAIL'))
+        Mail::to(config('mail.admin_address'))
             ->send(new MortgageApplicationReceived(
                 $dataForEmail,
                 collect($uploadedDocuments)->pluck('file_path')->toArray(),
@@ -266,7 +266,7 @@ class ApplicantController extends Controller
 
         $applicant->refresh();
 
-        Mail::to(env('MORTGAGE_APPLICATION_EMAIL'))
+        Mail::to(config('mail.admin_address'))
             ->send(new PaymentReceiptSubmitted($applicant));
 
         return redirect()

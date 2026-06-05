@@ -38,7 +38,7 @@ class StaffPaymentController extends Controller
                 'applicant'
             ));
 
-        Mail::to(env('MORTGAGE_APPLICATION_EMAIL'))
+        Mail::to(config('mail.admin_address'))
             ->send(new ManualPaymentVerified(
                 $payment->applicant,
                 $payment,
