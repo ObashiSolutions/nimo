@@ -163,7 +163,7 @@ class StaffApplicationController extends Controller
             'applicant_id' => $applicant->id,
             'provider' => 'manual_transfer',
             'reference' => 'STAFF-MANUAL-' . strtoupper(\Illuminate\Support\Str::random(10)),
-            'amount' => (int) env('PAYSTACK_PAYMENT_AMOUNT', 20000000),
+            'amount' => (int) config('services.paystack.payment_amount', 20000000),
             'currency' => 'NGN',
             'status' => 'pending_verification',
             'provider_response' => [

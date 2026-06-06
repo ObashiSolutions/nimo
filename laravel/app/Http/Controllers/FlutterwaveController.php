@@ -15,11 +15,12 @@ class FlutterwaveController extends Controller
 {
     public function initialize(Applicant $applicant)
     {
-        $amount = ((int) env('PAYSTACK_PAYMENT_AMOUNT', 20000000)) / 100;
+        $amountInKobo = (int) config('services.paystack.payment_amount', 20000000);
+        $amount = $amountInKobo / 100;
 
         $reference = 'FLW-' . $applicant->id . '-' . strtoupper(Str::random(10));
 
-        $response = Http::withToken(env('FLW_SECRET_KEY'))
+        $response = Http::withToken(config('services.flutterwave.secret_key'))
             ->post('https://api.flutterwave.com/v3/payments', [
                 'tx_ref' => $reference,
                 'amount' => $amount,
@@ -47,7 +48,7 @@ class FlutterwaveController extends Controller
             'applicant_id' => $applicant->id,
             'provider' => 'flutterwave',
             'reference' => $reference,
-            'amount' => (int) env('PAYSTACK_PAYMENT_AMOUNT', 20000000),
+            'amount' => $amountInKobo,
             'currency' => 'NGN',
             'status' => 'initialized',
             'authorization_url' => $response->json('data.link'),
@@ -75,7 +76,7 @@ class FlutterwaveController extends Controller
                 ->withErrors(['payment' => 'Missing Flutterwave transaction ID.']);
         }
 
-        $response = Http::withToken(env('FLW_SECRET_KEY'))
+        $response = Http::withToken(config('services.flutterwave.secret_key'))
             ->get("https://api.flutterwave.com/v3/transactions/{$transactionId}/verify");
 
         if (!$response->successful()) {
@@ -165,7 +166,7 @@ class FlutterwaveController extends Controller
     {
         $hash = $request->header('verif-hash');
 
-        if ($hash !== env('FLW_WEBHOOK_SECRET_HASH')) {
+        if ($hash !== config('services.flutterwave.webhook_secret_hash')) {
             return response()->json([
                 'message' => 'Invalid signature'
             ], 401);

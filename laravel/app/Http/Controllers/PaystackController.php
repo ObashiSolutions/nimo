@@ -19,10 +19,10 @@ class PaystackController extends Controller
 {
     public function initialize(Applicant $applicant)
     {
-        $amount = (int) env('PAYSTACK_PAYMENT_AMOUNT', 20000000);
+        $amount = (int) config('services.paystack.payment_amount', 20000000);
         $reference = 'NM-' . $applicant->id . '-' . strtoupper(Str::random(10));
 
-        $response = Http::withToken(env('PAYSTACK_SECRET_KEY'))
+        $response = Http::withToken(config('services.paystack.secret_key'))
             ->post('https://api.paystack.co/transaction/initialize', [
                 'email' => $applicant->email,
                 'amount' => $amount,
@@ -76,7 +76,7 @@ class PaystackController extends Controller
 
         $payment = Payment::where('reference', $reference)->firstOrFail();
 
-        $response = Http::withToken(env('PAYSTACK_SECRET_KEY'))
+        $response = Http::withToken(config('services.paystack.secret_key'))
             ->get("https://api.paystack.co/transaction/verify/{$reference}");
 
         if (!$response->successful() || !$response->json('status')) {
@@ -152,7 +152,7 @@ class PaystackController extends Controller
 
     public function webhook(Request $request)
     {
-        $secret = env('PAYSTACK_SECRET_KEY');
+        $secret = config('services.paystack.secret_key');
 
         $signature = $request->header('x-paystack-signature');
 
