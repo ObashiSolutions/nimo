@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
-use App\Mail\PaystackPaymentSuccessful;
+use App\Mail\FlutterwavePaymentSuccessful;
 
 class FlutterwaveController extends Controller
 {

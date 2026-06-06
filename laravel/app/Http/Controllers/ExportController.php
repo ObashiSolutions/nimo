@@ -6,7 +6,7 @@ use App\Models\Applicant;
 use Illuminate\Http\Request;
 // NOTE: The next two lines require you to install the Laravel Excel package first.
 use Maatwebsite\Excel\Facades\Excel;
-// use App\Exports\ApplicantsExport; 
+use App\Exports\ApplicantsExport;
 
 class ExportController extends Controller
 {

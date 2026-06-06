@@ -134,20 +134,20 @@
                                             onchange="this.form.submit()"
                                             class="border rounded-lg px-4 py-2"
                                         >
-                                            <option value="200" {{ request('per_page', 200) == 200 ? 'selected' : '' }}>
-                                                200 Per Page
+                                            <option value="50" {{ request('per_page', 50) == 50 ? 'selected' : '' }}>
+                                                50 Per Page
+                                            </option>
+
+                                            <option value="20" {{ request('per_page') == 20 ? 'selected' : '' }}>
+                                                20 Per Page
                                             </option>
 
                                             <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>
                                                 100 Per Page
                                             </option>
 
-                                            <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>
-                                                50 Per Page
-                                            </option>
-
-                                            <option value="20" {{ request('per_page') == 20 ? 'selected' : '' }}>
-                                                20 Per Page
+                                            <option value="200" {{ request('per_page') == 200 ? 'selected' : '' }}>
+                                                200 Per Page
                                             </option>
 
                                         </select>

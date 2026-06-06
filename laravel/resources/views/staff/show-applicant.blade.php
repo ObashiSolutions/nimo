@@ -376,7 +376,7 @@
         </form>
 
         <div class="space-y-4">
-            @forelse($applicant->tasks->sortByDesc('created_at') as $task)
+            @forelse($applicant->tasks as $task)
                 <div class="
                         border
                         rounded-lg
@@ -498,7 +498,7 @@
 
         <div class="space-y-4">
 
-            @forelse($applicant->notes->sortByDesc('created_at') as $note)
+            @forelse($applicant->notes as $note)
 
                 <div class="border rounded-lg p-4 bg-gray-50">
 

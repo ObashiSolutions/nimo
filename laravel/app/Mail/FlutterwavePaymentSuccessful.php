@@ -8,7 +8,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class PaystackPaymentSuccessful extends Mailable
+class FlutterwavePaymentSuccessful extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -27,11 +27,11 @@ class PaystackPaymentSuccessful extends Mailable
     {
         $subject = $this->emailType === 'applicant'
             ? 'Payment Received Successfully'
-            : 'Paystack Payment Verified';
+            : 'Flutterwave Payment Verified';
 
         $view = $this->emailType === 'applicant'
-            ? 'emails.paystack_payment_success_applicant'
-            : 'emails.paystack_payment_success_admin';
+            ? 'emails.flutterwave_payment_success_applicant'
+            : 'emails.flutterwave_payment_success_admin';
 
         return $this->subject($subject)
             ->view($view)

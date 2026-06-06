@@ -5,13 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Applicant;
 use App\Models\StaffUser;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Cache;
 
 class StaffDashboardController extends Controller
 {
     public function index()
     {
-        $perPage = request('per_page', 200);
+        $perPage = (int) request('per_page', 50);
+        $perPage = in_array($perPage, [20, 50, 100, 200], true) ? $perPage : 50;
+
         $search = request('search');
         $status = request('status');
         $assignedTo = request('assigned_to');
@@ -30,15 +32,18 @@ class StaffDashboardController extends Controller
             'payment_status',
         ];
 
-        if (!in_array($sort, $allowedSorts)) {
-            $sort = 'created_at';
+        if (!in_array($sort, $allowedSorts, true)) {
+            $sort = 'latest';
         }
 
-        if (!in_array($direction, ['asc', 'desc'])) {
+        if (!in_array($direction, ['asc', 'desc'], true)) {
             $direction = 'desc';
         }
 
-        $query = Applicant::with('documents', 'assignedStaffUser');
+        $query = Applicant::with([
+            'documents:id,applicant_id,original_name',
+            'assignedStaffUser:id,first_name,last_name,email,role',
+        ]);
 
         $currentStaffUser = Auth::guard('staff')->user();
 
@@ -50,20 +55,31 @@ class StaffDashboardController extends Controller
         }
 
         if ($search) {
-            $applicantColumns = Schema::getColumnListing('applicants');
             $searchTerms = collect(preg_split('/\s+/', trim($search)))
                 ->filter()
                 ->map(fn ($term) => mb_strtolower($term))
                 ->values();
 
-            $ignoreColumns = [
-                'id',
-                'created_at',
-                'updated_at',
-                'deleted_at',
+            $searchableColumns = [
+                'reference_id',
+                'first_name',
+                'last_name',
+                'address',
+                'city',
+                'state',
+                'email',
+                'phone_number',
+                'application_status',
+                'payment_status',
+                'company_name',
+                'years_employed',
+                'occupation',
+                'title',
+                'agent_name',
+                'estate_name',
+                'property_address',
+                'property_cost',
             ];
-
-            $searchableColumns = array_diff($applicantColumns, $ignoreColumns);
 
             $query->where(function ($q) use ($searchTerms, $searchableColumns) {
                 foreach ($searchTerms as $term) {
@@ -109,10 +125,14 @@ class StaffDashboardController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        $assignableStaffUsers = StaffUser::where('is_active', true)
-            ->orderByRaw('LOWER(first_name)')
-            ->orderByRaw('LOWER(last_name)')
-            ->get();
+        $assignableStaffUsers = Cache::remember(
+            'staff.assignable_users',
+            now()->addMinutes(5),
+            fn () => StaffUser::where('is_active', true)
+                ->orderByRaw('LOWER(first_name)')
+                ->orderByRaw('LOWER(last_name)')
+                ->get()
+        );
 
         return view(
             'staff.dashboard',

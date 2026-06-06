@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApplicantController;
-use App\Http\Controllers\ExportController; // We will use this later for the secure export
 use App\Http\Controllers\StaffDashboardController;
 use App\Http\Controllers\StaffApplicationController;
 use App\Http\Controllers\StaffApplicantController;
@@ -40,9 +39,7 @@ use App\Http\Controllers\FlutterwaveController; // For Flutterwave payment integ
 
 // 1. Home Page / Form Display
 // When the user visits nigeriamortgages.com/
-Route::get('/', function () {
-    return view('home');
-})->name('home');
+Route::view('/', 'home')->name('home');
 
 Route::get('/apply', [ApplicantController::class, 'showForm'])
     ->name('application.form');
@@ -73,11 +70,7 @@ Route::post('/payment/{id}', [ApplicantController::class, 'submitPaymentReceipt'
 // Important Note: Remember to secure the '/admin' routes heavily later!
 Auth::routes();
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-
-Auth::routes();
-
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('auth.home');
 
 Route::get('/staff/login', [StaffAuthController::class, 'showLogin'])
     ->name('staff.login');
@@ -176,6 +169,10 @@ Route::middleware('staff.auth')->group(function () {
         ->name('staff.payments.index')
         ->middleware('staff.role:admin,manager');
 
+    Route::get('/admin', [StaffDashboardController::class, 'index'])
+        ->name('admin.dashboard')
+        ->middleware('staff.role:admin,manager');
+
     // Admin and Manager routes (only accessible by admin and manager roles); export and staff management
     Route::middleware('staff.role:admin,manager')->group(function () {
 
@@ -190,6 +187,9 @@ Route::middleware('staff.auth')->group(function () {
 
         Route::get('/staff/applications/export/csv', [StaffExportController::class, 'exportCsv'])
             ->name('staff.applications.exportCsv');
+
+        Route::get('/admin/export', [StaffExportController::class, 'exportCsv'])
+            ->name('admin.export');
 
     });
 
