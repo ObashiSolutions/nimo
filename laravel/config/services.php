@@ -35,6 +35,11 @@ return [
         'webhook_secret_hash' => env('FLW_WEBHOOK_SECRET_HASH'),
     ],
 
+    'meta' => [
+        'pixel_id' => env('META_PIXEL_ID'),
+        'webhook_verify_token' => env('META_WEBHOOK_VERIFY_TOKEN'),
+    ],
+
     'ses' => [
         'key' => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
