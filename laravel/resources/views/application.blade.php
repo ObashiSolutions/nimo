@@ -5,6 +5,12 @@
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Nigeria Mortgages</title>
             <script src="https://cdn.tailwindcss.com"></script>
+            @include('partials.meta-pixel')
+            @if(config('services.meta.pixel_id'))
+                <script>
+                    fbq('trackCustom', 'ApplicationPageViewed');
+                </script>
+            @endif
             <style>
                 body { font-family: 'Inter', sans-serif; background-color: #f7fafc; }
                 .hero-background {

@@ -19,6 +19,7 @@ use App\Http\Controllers\StaffAssignmentController;
 use App\Http\Controllers\StaffProfileController;
 use App\Http\Controllers\StaffPaymentReportController;
 use App\Http\Controllers\FlutterwaveController; // For Flutterwave payment integration
+use App\Http\Controllers\MetaWebhookController;
 
 
 
@@ -59,6 +60,12 @@ Route::get('/payment/{id}', [ApplicantController::class, 'showPaymentPage'])
 // 5. Payment Receipt Submission (POST Request)
 Route::post('/payment/{id}', [ApplicantController::class, 'submitPaymentReceipt'])
     ->name('application.payment.submit');
+
+Route::get('/meta/webhook', [MetaWebhookController::class, 'verify'])
+    ->name('meta.webhook.verify');
+
+Route::post('/meta/webhook', [MetaWebhookController::class, 'receive'])
+    ->name('meta.webhook.receive');
 
 
 // --- SECURE ADMIN ROUTES (For you to manage data) ---

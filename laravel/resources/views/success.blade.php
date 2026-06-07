@@ -5,6 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mortgage Pre-Approval – Application Submitted</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    @include('partials.meta-pixel')
+    @if(config('services.meta.pixel_id'))
+        <script>
+            @if(session('success_type') === 'online_payment')
+                fbq('track', 'Purchase', {
+                    value: 200000,
+                    currency: 'NGN'
+                });
+            @elseif(session('success_type') === 'manual_receipt')
+                fbq('trackCustom', 'ManualReceiptSubmitted');
+            @else
+                fbq('track', 'Lead');
+            @endif
+        </script>
+    @endif
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f7fafc; }
         .hero-background {

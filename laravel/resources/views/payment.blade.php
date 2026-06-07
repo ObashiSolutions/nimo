@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mortgage Payment</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    @include('partials.meta-pixel')
+    @if(config('services.meta.pixel_id'))
+        <script>
+            fbq('track', 'InitiateCheckout', {
+                value: 200000,
+                currency: 'NGN'
+            });
+        </script>
+    @endif
 </head>
 
 <body class="bg-gray-100 min-h-screen">

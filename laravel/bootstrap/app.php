@@ -12,6 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
 
+        $middleware->validateCsrfTokens(except: [
+            'meta/webhook',
+        ]);
+
         $middleware->alias([
             'staff.auth' => \App\Http\Middleware\StaffAuth::class,
             'staff.role' => \App\Http\Middleware\StaffRole::class,
