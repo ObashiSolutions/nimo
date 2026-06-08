@@ -38,6 +38,7 @@ return [
     'meta' => [
         'pixel_id' => env('META_PIXEL_ID'),
         'webhook_verify_token' => env('META_WEBHOOK_VERIFY_TOKEN'),
+        'app_secret' => env('META_APP_SECRET'),
     ],
 
     'ses' => [
