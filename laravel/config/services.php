@@ -41,6 +41,10 @@ return [
         'app_secret' => env('META_APP_SECRET'),
     ],
 
+    'google' => [
+        'ads_tag_id' => env('GOOGLE_ADS_TAG_ID'),
+    ],
+
     'ses' => [
         'key' => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),

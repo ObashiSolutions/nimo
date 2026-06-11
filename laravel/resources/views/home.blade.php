@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nigeria Mortgages</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    @include('partials.google-tag')
     @include('partials.meta-pixel')
 
     <style>
