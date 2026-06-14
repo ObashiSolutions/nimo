@@ -263,7 +263,8 @@ class StaffUserController extends Controller
         }
 
         if (
-            $currentStaffUser?->role === 'manager'
+            ! $staffUser->trashed()
+            && $currentStaffUser?->role === 'manager'
             && (int) $staffUser->managed_by_staff_user_id === (int) $currentStaffUser->id
             && in_array($staffUser->role, ['reviewer', 'support'], true)
         ) {
