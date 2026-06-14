@@ -45,6 +45,7 @@ class StaffProfileController extends Controller
 
         $user->update([
             'password' => Hash::make($request->password),
+            'must_change_password' => false,
         ]);
 
         return back()->with('success_message', 'Password updated successfully.');
