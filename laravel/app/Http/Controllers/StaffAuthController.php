@@ -23,10 +23,10 @@ class StaffAuthController extends Controller
 
         $user = StaffUser::where('email', $credentials['email'])->first();
 
-        if (!$user || !$user->is_active) {
+        if (!$user || !$user->isAvailableForLogin()) {
 
             return back()->withErrors([
-                'email' => 'Invalid credentials or inactive account.',
+                'email' => 'Invalid credentials or unavailable account.',
             ]);
         }
 
@@ -42,6 +42,12 @@ class StaffAuthController extends Controller
             ]);
 
             $request->session()->regenerate();
+
+            if ($user->must_change_password) {
+                return redirect()
+                    ->route('staff.profile.edit')
+                    ->withErrors('Please change your temporary password before continuing.');
+            }
 
             return redirect()->route('staff.dashboard');
         }
