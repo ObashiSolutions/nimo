@@ -85,6 +85,12 @@ Route::get('/staff/login', [StaffAuthController::class, 'showLogin'])
 Route::post('/staff/login', [StaffAuthController::class, 'login'])
     ->name('staff.login.submit');
 
+Route::get('/staff/password/reset/{staffUser}', [StaffUserController::class, 'showPasswordReset'])
+    ->name('staff.password.reset');
+
+Route::post('/staff/password/reset/{staffUser}', [StaffUserController::class, 'updatePasswordFromReset'])
+    ->name('staff.password.reset.update');
+
 // Paystack payment routes (outside of Staff role middleware since applicants will access these directly)
 Route::post('/payment/{applicant}/paystack/initialize', [PaystackController::class, 'initialize'])
     ->name('paystack.initialize');
@@ -189,8 +195,32 @@ Route::middleware('staff.auth')->group(function () {
         Route::post('/staff/users', [StaffUserController::class, 'store'])
             ->name('staff.users.store');
 
-        Route::patch('/staff/users/{staffUser}/toggle-status', [StaffUserController::class, 'toggleStatus'])
-            ->name('staff.users.toggleStatus');
+        Route::get('/staff/users/{staffUser}', [StaffUserController::class, 'show'])
+            ->name('staff.users.show');
+
+        Route::patch('/staff/users/{staffUser}/role', [StaffUserController::class, 'updateRole'])
+            ->name('staff.users.updateRole');
+
+        Route::patch('/staff/users/{staffUser}/manager', [StaffUserController::class, 'updateManager'])
+            ->name('staff.users.updateManager');
+
+        Route::patch('/staff/users/{staffUser}/status', [StaffUserController::class, 'updateStatus'])
+            ->name('staff.users.updateStatus');
+
+        Route::post('/staff/users/{staffUser}/password-reset-link', [StaffUserController::class, 'sendResetLink'])
+            ->name('staff.users.sendResetLink');
+
+        Route::post('/staff/users/{staffUser}/temporary-password', [StaffUserController::class, 'sendTemporaryPassword'])
+            ->name('staff.users.sendTemporaryPassword');
+
+        Route::delete('/staff/users/{staffUser}', [StaffUserController::class, 'destroy'])
+            ->name('staff.users.destroy');
+
+        Route::patch('/staff/users/{staffUser}/restore', [StaffUserController::class, 'restore'])
+            ->name('staff.users.restore');
+
+        Route::delete('/staff/users/{staffUser}/force-delete', [StaffUserController::class, 'forceDelete'])
+            ->name('staff.users.forceDelete');
 
         Route::get('/staff/applications/export/csv', [StaffExportController::class, 'exportCsv'])
             ->name('staff.applications.exportCsv');
