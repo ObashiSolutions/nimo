@@ -53,7 +53,7 @@
                         <h2 class="text-lg font-semibold text-slate-900">Access</h2>
 
                         <div class="mt-4 grid gap-4 md:grid-cols-2">
-                            <form method="POST" action="{{ route('staff.users.role.update', $staffUser) }}">
+                            <form method="POST" action="{{ route('staff.users.updateRole', $staffUser) }}">
                                 @csrf
                                 @method('PATCH')
                                 <label for="role" class="block text-sm font-medium text-slate-700">Role</label>
@@ -67,7 +67,7 @@
                                 </div>
                             </form>
 
-                            <form method="POST" action="{{ route('staff.users.status.update', $staffUser) }}">
+                            <form method="POST" action="{{ route('staff.users.updateStatus', $staffUser) }}">
                                 @csrf
                                 @method('PATCH')
                                 <label for="account_status" class="block text-sm font-medium text-slate-700">Status</label>
@@ -83,7 +83,7 @@
                         </div>
 
                         @if ($isAdmin)
-                            <form method="POST" action="{{ route('staff.users.manager.update', $staffUser) }}" class="mt-4">
+                            <form method="POST" action="{{ route('staff.users.updateManager', $staffUser) }}" class="mt-4">
                                 @csrf
                                 @method('PATCH')
                                 <label for="managed_by_staff_user_id" class="block text-sm font-medium text-slate-700">Managed by</label>
@@ -107,12 +107,12 @@
                         <p class="mt-1 text-sm text-slate-500">Send help to this staff user's login email.</p>
 
                         <div class="mt-4 flex flex-col gap-3 sm:flex-row">
-                            <form method="POST" action="{{ route('staff.users.password-reset-link', $staffUser) }}">
+                            <form method="POST" action="{{ route('staff.users.sendResetLink', $staffUser) }}">
                                 @csrf
                                 <button type="submit" class="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">Send reset link</button>
                             </form>
 
-                            <form method="POST" action="{{ route('staff.users.temporary-password', $staffUser) }}" onsubmit="return confirm('Generate and email a new temporary password?');">
+                            <form method="POST" action="{{ route('staff.users.sendTemporaryPassword', $staffUser) }}" onsubmit="return confirm('Generate and email a new temporary password?');">
                                 @csrf
                                 <button type="submit" class="rounded-md bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700">Send temporary password</button>
                             </form>
@@ -131,7 +131,7 @@
                                     @method('PATCH')
                                     <button type="submit" class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Restore user</button>
                                 </form>
-                                <form method="POST" action="{{ route('staff.users.force-delete', $staffUser->id) }}" onsubmit="return confirm('Permanently delete this staff user? This cannot be undone.');">
+                                <form method="POST" action="{{ route('staff.users.forceDelete', $staffUser->id) }}" onsubmit="return confirm('Permanently delete this staff user? This cannot be undone.');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700">Permanently delete</button>

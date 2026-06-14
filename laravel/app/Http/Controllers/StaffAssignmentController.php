@@ -7,13 +7,19 @@ use App\Models\ApplicantTimeline;
 use App\Models\StaffUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class StaffAssignmentController extends Controller
 {
     public function assign(Request $request, Applicant $applicant)
     {
         $request->validate([
-            'assigned_staff_user_id' => 'nullable|exists:staff_users,id',
+            'assigned_staff_user_id' => [
+                'nullable',
+                Rule::exists('staff_users', 'id')
+                    ->where('is_active', true)
+                    ->where('account_status', 'active'),
+            ],
         ]);
 
         $staffUser = StaffUser::find($request->assigned_staff_user_id);

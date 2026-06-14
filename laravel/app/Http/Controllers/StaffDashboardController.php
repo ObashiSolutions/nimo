@@ -129,6 +129,7 @@ class StaffDashboardController extends Controller
             'staff.assignable_users',
             now()->addMinutes(5),
             fn () => StaffUser::where('is_active', true)
+                ->where('account_status', 'active')
                 ->orderByRaw('LOWER(first_name)')
                 ->orderByRaw('LOWER(last_name)')
                 ->get()

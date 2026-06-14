@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\StaffUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
@@ -93,6 +94,8 @@ class StaffUserController extends Controller
             'status_changed_at' => now(),
         ]);
 
+        Cache::forget('staff.assignable_users');
+
         return back()->with('success_message', 'Staff user created successfully.');
     }
 
@@ -107,6 +110,8 @@ class StaffUserController extends Controller
         $staffUser->update([
             'role' => $validated['role'],
         ]);
+
+        Cache::forget('staff.assignable_users');
 
         return back()->with('success_message', 'Staff role updated.');
     }
@@ -126,6 +131,8 @@ class StaffUserController extends Controller
         $staffUser->update([
             'managed_by_staff_user_id' => $validated['managed_by_staff_user_id'] ?? null,
         ]);
+
+        Cache::forget('staff.assignable_users');
 
         return back()->with('success_message', 'Staff manager updated.');
     }
@@ -147,6 +154,8 @@ class StaffUserController extends Controller
             'is_active' => $validated['account_status'] === 'active',
             'status_changed_at' => now(),
         ]);
+
+        Cache::forget('staff.assignable_users');
 
         return back()->with('success_message', 'Staff status updated.');
     }
@@ -202,6 +211,8 @@ class StaffUserController extends Controller
 
         $staffUser->delete();
 
+        Cache::forget('staff.assignable_users');
+
         return redirect()
             ->route('staff.users.index')
             ->with('success_message', 'Staff user moved to deleted users.');
@@ -214,6 +225,8 @@ class StaffUserController extends Controller
         $staffUser = StaffUser::onlyTrashed()->findOrFail($staffUser);
         $staffUser->restore();
 
+        Cache::forget('staff.assignable_users');
+
         return back()->with('success_message', 'Staff user restored.');
     }
 
@@ -223,6 +236,8 @@ class StaffUserController extends Controller
 
         $staffUser = StaffUser::onlyTrashed()->findOrFail($staffUser);
         $staffUser->forceDelete();
+
+        Cache::forget('staff.assignable_users');
 
         return redirect()
             ->route('staff.users.index', ['view' => 'deleted'])
